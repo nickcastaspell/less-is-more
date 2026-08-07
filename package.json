@@ -1,0 +1,22 @@
+{
+  "name": "less-is-more-game",
+  "version": "1.0.0",
+  "description": "Business game 'Less is More' - Leadership Through Smart Resource Allocation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/simulate.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "qrcode": "^1.5.3",
+    "socket.io": "^4.7.5",
+    "uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}

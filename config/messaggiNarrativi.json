@@ -1,0 +1,23 @@
+{
+  "_note": "Regole generali (non legate a un nome specifico) valutate a ogni chiusura round per generare i messaggi narrativi mostrati al tavolo.",
+  "dipendenza": {
+    "descrizione": "Un collaboratore ormai competente e autonomo continua comunque a chiedere aiuto: segnale che il manager e' stato seguito troppo a lungo e non ha lasciato spazio.",
+    "condizioni": {
+      "competenzaMin": 70,
+      "autonomiaMin": 55,
+      "usiConsecutiviAffiancamentoMin": 3,
+      "richiestaAttivaQuestoRound": true
+    },
+    "template": "{nome} ti chiede ancora aiuto, anche se ormai se la caverebbe da solo. Hai creato dipendenza."
+  },
+  "abbandono": {
+    "descrizione": "Un collaboratore trascurato a lungo comunica l'intenzione di andarsene quando finalmente il manager si fa vivo.",
+    "condizioni": {
+      "roundConsecutiviTrascuratoMin": 3,
+      "azioneQuestoRoundDiversaDaNessunIntervento": true
+    },
+    "template": "{nome}: l'hai trascurato/a troppe volte. Oggi, proprio mentre lo cerchi, ti comunica che sta valutando altre offerte.",
+    "effetto": "escePotenzialmenteDallaRete"
+  },
+  "azioniAffiancamento": ["shadowing", "coaching", "surroga"]
+}

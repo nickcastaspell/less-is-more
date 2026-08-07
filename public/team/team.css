@@ -1,0 +1,234 @@
+@import url("/shared/base.css");
+
+.card-form { max-width: 420px; margin: 60px auto; }
+.centro { text-align: center; }
+
+.errore { color: var(--red-warn); font-size: 0.85rem; }
+
+.spinner {
+  width: 36px; height: 36px; margin: 20px auto 0;
+  border: 4px solid var(--navy-700); border-top-color: var(--gold-400);
+  border-radius: 50%; animation: girare 1s linear infinite;
+}
+@keyframes girare { to { transform: rotate(360deg); } }
+
+.gioco-header {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+}
+.ore-box { min-width: 160px; }
+.ore-label { font-size: 0.75rem; color: var(--text-muted); }
+.ore-valore { font-size: 1.4rem; font-weight: 700; color: var(--gold-300); margin: 2px 0 6px; }
+
+.griglia-collaboratori {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.collaboratore-card {
+  background: var(--navy-900);
+  border: 1px solid var(--navy-700);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.collaboratore-card .nome-collaboratore { margin: 0; color: var(--gold-300); }
+
+.collaboratore-card.cliccabile { cursor: pointer; }
+.collaboratore-card.cliccabile:hover { border-color: var(--gold-400); }
+
+.riga-nome-stelle { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
+.stelle-overall { color: var(--gold-400); font-size: 0.82rem; letter-spacing: 1px; white-space: nowrap; flex-shrink: 0; }
+
+.stats-collaboratore { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.stat-chip {
+  font-size: 0.7rem; padding: 3px 8px; border-radius: 10px;
+  background: var(--navy-800); border: 1px solid var(--navy-600); color: var(--text-muted);
+}
+
+/* Barre di avanzamento (Autonomia/Motivazione/Competenza) con freccia di tendenza: sostituiscono
+   i valori numerici sulla scheda, che i partecipanti possono solo dedurre dal confronto visivo. */
+.barre-stat-collaboratore { margin-bottom: 10px; }
+.riga-barra-stat { margin-bottom: 8px; }
+.riga-barra-stat:last-child { margin-bottom: 0; }
+.barra-stat-label {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;
+}
+.barra-track { width: 100%; height: 8px; background: var(--navy-700); border-radius: 6px; overflow: hidden; }
+.barra-fill { height: 100%; background: var(--gold-400); border-radius: 6px; transition: width 0.4s ease; }
+.freccia-trend { font-size: 0.78rem; margin-left: 6px; font-weight: 700; }
+.freccia-trend.su { color: var(--green-ok); }
+.freccia-trend.giu { color: var(--red-warn); }
+.freccia-trend.stabile { color: var(--text-muted); }
+
+.azione-corrente { font-size: 0.75rem; margin-bottom: 6px; min-height: 1em; }
+.intro-zona-team { font-size: 0.85rem; color: var(--text-muted); margin: -4px 0 14px; }
+
+.conferma-box { text-align: center; }
+#confermatoLabel { color: var(--green-ok); font-weight: 600; margin-left: 12px; }
+
+.posizione-finale, .punteggio-finale { font-size: 1.4rem; margin: 10px 0; color: var(--gold-300); }
+.profilo-finale-card { max-width: 520px; margin: 0 auto; }
+.tendenza { font-size: 0.85rem; color: var(--text-muted); }
+
+.fase-badge {
+  display: inline-block; background: var(--gold-400); color: var(--navy-950);
+  font-size: 0.7rem; font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-right: 8px; vertical-align: middle;
+}
+
+.banner-crisi { border: 1px solid var(--red-warn); background: #3a1f1a; }
+.banner-crisi h3 { color: #f0a89a; margin: 0 0 6px; }
+
+.banner-narrativo { border: 1px solid #9b7fd1; background: #241a30; font-size: 0.9rem; line-height: 1.6; }
+
+.banner-fluttuante {
+  position: sticky; top: 8px; z-index: 20; margin: 8px 16px 0;
+  background: var(--gold-400); color: var(--navy-950); border-radius: 8px;
+  padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  font-size: 0.85rem; font-weight: 600;
+}
+.banner-fluttuante-chiudi { background: none; border: none; color: var(--navy-950); font-size: 1.1rem; cursor: pointer; line-height: 1; }
+
+.riga-categoria-richiesta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.select-categoria { font-size: 0.75rem; padding: 4px 6px; }
+.richiesta-inline { font-size: 0.75rem; color: var(--gold-300); min-height: 1em; }
+.richiesta-inline.nessuna { color: var(--text-muted); font-style: italic; }
+
+.collaboratore-card.uscito { opacity: 0.5; }
+.tag-uscito { font-size: 0.7rem; color: var(--red-warn); font-weight: 700; }
+
+.griglia-azioni-sistemiche { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.azione-sistemica-toggle {
+  text-align: left; background: var(--navy-800); border: 1px solid var(--navy-600); border-radius: 8px;
+  padding: 10px 12px; cursor: pointer; color: var(--text-primary); font-size: 0.8rem;
+}
+.azione-sistemica-toggle .titolo { font-weight: 600; display: block; margin-bottom: 4px; }
+.azione-sistemica-toggle .costo { color: var(--text-muted); font-size: 0.7rem; }
+.azione-sistemica-toggle.selezionata { border-color: var(--gold-400); background: var(--navy-700); }
+
+.timer-round { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+.timer-round.scaduto #timerRoundTeamValore { color: var(--red-warn); font-weight: 700; }
+
+.banner-lock { border: 1px solid var(--gold-400); background: #3a331a; text-align: center; }
+.banner-lock .btn { margin-top: 8px; }
+
+.overlay-pausa {
+  position: fixed; inset: 0; z-index: 50; background: rgba(11, 18, 32, 0.92);
+  display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;
+}
+.overlay-pausa-box { max-width: 420px; text-align: center; background: var(--navy-800); border: 1px solid var(--gold-400); border-radius: var(--radius); padding: 28px; max-height: calc(100vh - 40px); overflow-y: auto; }
+.overlay-pausa-box h2 { color: var(--gold-300); margin: 0 0 10px; }
+
+/* ---------- La "scrivania" del DLG: 4 aree navigabili ---------- */
+.scrivania-nav { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 16px; }
+.zona-btn {
+  position: relative; flex: 1; min-width: 110px; background: var(--navy-900); border: 1px solid var(--navy-700);
+  color: var(--text-muted); padding: 10px 8px; border-radius: 10px; cursor: pointer;
+  font-size: 0.78rem; text-align: center; line-height: 1.4;
+}
+.zona-btn .zona-icona { font-size: 1.2rem; display: block; margin-bottom: 3px; }
+.zona-btn.attiva { border-color: var(--gold-400); background: var(--navy-800); color: var(--gold-300); }
+.zona-btn:hover:not(.attiva) { border-color: var(--navy-600); color: var(--text-primary); }
+.zona-badge {
+  position: absolute; top: -6px; right: -6px; background: var(--red-warn); color: #fff;
+  font-size: 0.65rem; font-weight: 700; border-radius: 10px; padding: 2px 6px; min-width: 17px;
+}
+.zona-scrivania { display: block; }
+.zona-scrivania.hidden { display: none; }
+
+/* ---------- Zona Telefono ---------- */
+.telefono-shell { background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: 20px; padding: 10px; max-width: 380px; margin: 0 auto; }
+.telefono-header { text-align: center; padding: 8px 0 4px; font-size: 0.75rem; color: var(--text-muted); }
+.lista-notifiche { display: flex; flex-direction: column; gap: 8px; padding: 6px; min-height: 60px; }
+.notifica-item {
+  position: relative;
+  display: flex; gap: 10px; align-items: flex-start; background: var(--navy-800); border: 1px solid var(--navy-600);
+  border-radius: 10px; padding: 10px 12px; cursor: pointer; text-align: left;
+}
+.notifica-item:hover { border-color: var(--gold-400); }
+/* La spunta di "gia' gestita" deve leggersi a colpo d'occhio: bordo verde sull'intera riga
+   piu' un badge rotondo pieno in alto a destra, non solo una scritta piccola in coda al testo. */
+.notifica-item.risposta-data { border-color: var(--green-ok); background: #16261f; }
+.notifica-avatar { font-size: 1.2rem; flex-shrink: 0; }
+.notifica-testo { flex: 1; min-width: 0; }
+.notifica-testo .notifica-nome { font-weight: 700; font-size: 0.83rem; color: var(--gold-300); }
+.notifica-testo .notifica-anteprima { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+.notifica-tag-risposta {
+  font-size: 0.72rem; color: var(--green-ok); margin-top: 5px; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.notifica-check-badge {
+  position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--green-ok); color: #06170f; font-size: 0.8rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px var(--navy-950);
+}
+.notifica-vuota { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 18px 10px; }
+
+/* ---------- Overlay richiesta (zona Telefono) e overlay Cronologia (zona Team) ---------- */
+.overlay {
+  position: fixed; inset: 0; background: rgba(6, 10, 20, 0.82); z-index: 45;
+  display: flex; align-items: flex-start; justify-content: center; padding: 20px;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.overlay-box {
+  background: var(--navy-900); border: 1px solid var(--gold-400); border-radius: var(--radius);
+  max-width: 400px; width: 100%; padding: 18px; text-align: center;
+  margin: auto 0; max-height: calc(100vh - 40px); overflow-y: auto;
+}
+.overlay-box h2 { margin: 0 0 3px; letter-spacing: 1px; color: var(--gold-300); font-size: 1.05rem; }
+.overlay-box .sottotitolo { font-size: 0.76rem; color: var(--text-muted); margin-bottom: 10px; }
+.overlay-box .narrativa { font-size: 0.86rem; line-height: 1.5; margin-bottom: 12px; text-align: left; }
+.overlay-box .cosa-fai-label { font-size: 0.8rem; color: var(--gold-300); margin-bottom: 8px; }
+/* Lista opzioni compatta: righe strette, tutte su una sola linea (radio | etichetta | ore).
+   Uno scroll interno (non sull'intero overlay) tiene sempre visibili titolo/conferma/annulla
+   anche quando le azioni disponibili sono molte. */
+.opzioni-azione {
+  display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; text-align: left;
+  max-height: 38vh; overflow-y: auto; padding-right: 2px;
+}
+.opzione-riga {
+  display: flex; flex-direction: row; align-items: center; gap: 10px;
+  background: var(--navy-800); border: 1px solid var(--navy-600); border-radius: 8px;
+  padding: 7px 12px; cursor: pointer; font-size: 0.82rem; line-height: 1.2;
+}
+.opzione-riga:hover { border-color: var(--gold-400); }
+.opzione-riga input { accent-color: var(--gold-400); flex-shrink: 0; }
+.opzione-riga span:first-of-type { flex: 1; }
+.tempo-richiesto { font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px; }
+.tempo-richiesto strong { color: var(--gold-300); font-size: 1rem; }
+.btn-chiudi-overlay { background: none; border: none; color: var(--text-muted); font-size: 0.76rem; cursor: pointer; margin-top: 8px; text-decoration: underline; }
+
+/* ---------- Overlay Cronologia (scheda collaboratore cliccabile) ---------- */
+.timeline-mini { margin: 12px 0; padding-top: 10px; border-top: 1px dashed var(--navy-700); text-align: left; max-height: 34vh; overflow-y: auto; }
+.timeline-mini-item { display: flex; gap: 8px; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; }
+.timeline-mini-item .ic { flex-shrink: 0; }
+.timeline-mini-item .rnd { opacity: 0.7; font-size: 0.72rem; }
+.cronologia-vuota { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 10px; }
+.separatore-cronologia { border: none; border-top: 1px dashed var(--navy-700); margin: 14px 0; }
+
+/* ---------- Zona Cruscotto ---------- */
+.griglia-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.kpi-card { background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: var(--radius); padding: 14px; }
+.kpi-card .kpi-label { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px; }
+.kpi-card .kpi-valore { font-size: 1.5rem; font-weight: 700; color: var(--gold-300); }
+.kpi-card .kpi-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
+
+/* ---------- Zona Agenda ---------- */
+.agenda-ore-box { background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; text-align: center; }
+.agenda-ore-box .valore-grande { font-size: 1.5rem; font-weight: 700; color: var(--gold-300); margin: 6px 0; }
+.agenda-lista-titolo { font-size: 0.8rem; margin: 4px 0 8px; }
+.agenda-azione-riga {
+  display: flex; justify-content: space-between; align-items: center; background: var(--navy-900);
+  border: 1px solid var(--navy-700); border-radius: 10px; padding: 9px 14px; margin-bottom: 8px; font-size: 0.83rem;
+}
+.agenda-azione-riga .chi { color: var(--gold-300); font-weight: 600; }
+.agenda-azione-riga .cosa { color: var(--text-muted); font-size: 0.76rem; }
+.agenda-vuota { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 14px; }
+
+.tag-in-agenda { display: inline-block; margin-top: 6px; font-size: 0.66rem; color: var(--green-ok); border: 1px solid var(--green-ok); border-radius: 10px; padding: 2px 8px; }
+
+/* ---------- Fase 3: la crisi cambia il "mood" di tutta la scrivania ---------- */
+body { transition: background 0.6s ease; }
+body.crisi-attiva { background: #1c140d; }
+body.crisi-attiva .topbar { background: linear-gradient(180deg, #241a12, #1c140d); }

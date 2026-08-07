@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Less is More — Tavolo</title>
+<link rel="stylesheet" href="team.css" />
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand-title">LESS IS MORE</span>
+    <span id="nomeTavoloBadge" class="badge hidden"></span>
+  </header>
+
+  <div id="bannerFluttuante" class="banner-fluttuante hidden">
+    <div class="banner-fluttuante-testo"></div>
+    <button class="banner-fluttuante-chiudi" aria-label="Chiudi">×</button>
+  </div>
+
+  <div id="overlayPausa" class="overlay-pausa hidden">
+    <div class="overlay-pausa-box">
+      <h2>⏸ Il facilitatore ha messo in pausa</h2>
+      <p class="muted">Le vostre scelte sono al sicuro. Riprenderete a poter agire non appena il facilitatore riavvia la sessione.</p>
+    </div>
+  </div>
+
+  <main id="app">
+
+    <!-- SCHERMATA: accesso manuale (fallback se non c'e' link diretto) -->
+    <section id="schermataAccesso" class="schermata">
+      <div class="card card-form">
+        <h2>Accedi al tuo tavolo</h2>
+        <label>ID sessione
+          <input type="text" id="inputSessionId" placeholder="Es. 38026764" />
+        </label>
+        <label>Codice tavolo
+          <input type="text" id="inputCodice" placeholder="Es. AB23K" style="text-transform:uppercase" />
+        </label>
+        <button id="btnAccedi" class="btn btn-primario">Entra in gioco</button>
+        <p id="erroreAccesso" class="errore hidden"></p>
+      </div>
+    </section>
+
+    <!-- SCHERMATA: Fase 1 - classificazione -->
+    <section id="schermataFase1Team" class="schermata hidden">
+      <div class="card">
+        <h2>Fase 1 — Conoscere</h2>
+        <p class="muted">Leggete le schede cartacee dei collaboratori e classificateli qui sotto. Potrete cambiare idea in qualsiasi momento della partita, se un collaboratore vi sembra diverso da come lo avevate inquadrato.</p>
+      </div>
+      <div id="grigliaClassificazione" class="griglia-collaboratori"></div>
+      <div class="card centro">
+        <p class="muted">In attesa che il facilitatore avvii la Fase 2...</p>
+      </div>
+    </section>
+
+    <!-- SCHERMATA: attesa -->
+    <section id="schermataAttesa" class="schermata hidden">
+      <div id="cardImpattoCrisi" class="card banner-crisi hidden"></div>
+      <div id="cardMessaggiAttesa" class="card banner-narrativo hidden"></div>
+      <div class="card centro">
+        <h2 id="titoloAttesa">In attesa che il facilitatore avvii la settimana</h2>
+        <p class="muted">Settimana <span id="roundAttesaCorrente">1</span> / <span id="roundAttesaTotale">5</span></p>
+        <div class="spinner"></div>
+      </div>
+    </section>
+
+    <!-- SCHERMATA: gioco (settimana attiva) — la "scrivania" del DLG -->
+    <section id="schermataGioco" class="schermata hidden">
+      <div id="bannerCrisiTeam" class="card banner-crisi hidden">
+        <h3>Fase 3 — Crisi in corso</h3>
+        <p id="testoCrisiTeam" class="muted"></p>
+      </div>
+
+      <div class="card gioco-header">
+        <div>
+          <div class="round-indicator"><span id="faseBadgeTeam" class="fase-badge">Fase 2</span> Settimana <span id="roundGiocoCorrente">1</span> / <span id="roundGiocoTotale">5</span></div>
+          <div class="muted">Clima rete: <span id="climaTeamValore">70</span>/100</div>
+          <div id="timerRoundTeam" class="timer-round hidden">⏱ <span id="timerRoundTeamValore">--:--</span></div>
+        </div>
+        <div class="ore-box">
+          <div class="ore-label">Ore manageriali</div>
+          <div class="ore-valore"><span id="oreResidue">10</span>/<span id="oreTotali">10</span></div>
+          <div class="progress-bar-track"><div id="oreProgressFill" class="progress-bar-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+
+      <div id="cardLockAttivo" class="card banner-lock hidden">
+        <p class="muted">Le vostre scelte sono confermate e bloccate. Sbloccatele per poter cambiare qualcosa.</p>
+        <button id="btnSbloccaConferma" class="btn btn-secondario">Sblocca per modificare</button>
+      </div>
+
+      <nav class="scrivania-nav">
+        <button class="zona-btn attiva" data-zona="team">
+          <span class="zona-icona">👥</span>Team
+        </button>
+        <button class="zona-btn" data-zona="telefono">
+          <span class="zona-icona">📱</span>Telefono
+          <span class="zona-badge hidden" id="badgeTelefono">0</span>
+        </button>
+        <button class="zona-btn" data-zona="cruscotto">
+          <span class="zona-icona">📊</span>Cruscotto
+        </button>
+        <button class="zona-btn" data-zona="agenda">
+          <span class="zona-icona">📅</span>Agenda
+        </button>
+      </nav>
+
+      <!-- ZONA: Team -->
+      <div id="zonaTeam" class="zona-scrivania">
+        <p class="intro-zona-team muted">Le schede dei tuoi collaboratori. Aprine una per vedere la sua cronologia.</p>
+        <div id="grigliaCollaboratori" class="griglia-collaboratori"></div>
+
+        <div id="cardAzioniSistemiche" class="card hidden">
+          <h3>Azioni sistemiche</h3>
+          <p class="muted">Agiscono sull'intera rete, non su un singolo collaboratore: costruiscono capacità invece di gestire un'attività.</p>
+          <div id="grigliaAzioniSistemiche" class="griglia-azioni-sistemiche"></div>
+        </div>
+      </div>
+
+      <!-- ZONA: Telefono -->
+      <div id="zonaTelefono" class="zona-scrivania hidden">
+        <div class="telefono-shell">
+          <div class="telefono-header">● ● ●&nbsp;&nbsp;Settimana <span id="telefonoRoundLabel">1</span></div>
+          <div class="lista-notifiche" id="listaNotifiche"></div>
+        </div>
+      </div>
+
+      <!-- ZONA: Cruscotto -->
+      <div id="zonaCruscotto" class="zona-scrivania hidden">
+        <div class="griglia-kpi" id="grigliaKpiCruscotto"></div>
+      </div>
+
+      <!-- ZONA: Agenda -->
+      <div id="zonaAgenda" class="zona-scrivania hidden">
+        <div class="agenda-ore-box">
+          <div class="muted" style="font-size:0.78rem;">Ore manageriali disponibili questa settimana</div>
+          <div class="valore-grande"><span id="agendaOreResidue">10</span>/<span id="agendaOreTotali">10</span></div>
+          <div class="progress-bar-track"><div id="agendaBarraOre" class="progress-bar-fill" style="width:100%"></div></div>
+        </div>
+        <div class="agenda-lista-titolo muted">Azioni pianificate questa settimana</div>
+        <div id="agendaListaAzioni"></div>
+      </div>
+
+      <div class="card conferma-box">
+        <p class="muted">Puoi cambiare le tue scelte finché il facilitatore non chiude la settimana.</p>
+        <button id="btnConfermaRound" class="btn btn-primario">Ho deciso per questa settimana</button>
+        <span id="confermatoLabel" class="hidden">✓ Scelte inviate</span>
+      </div>
+    </section>
+
+    <!-- Overlay richiesta (usato dalla zona Telefono) -->
+    <div id="overlayRichiestaTelefono" class="overlay hidden">
+      <div class="overlay-box" id="overlayRichiestaContenuto"></div>
+    </div>
+
+    <!-- Overlay cronologia (usato dalla zona Team: click su una scheda collaboratore) -->
+    <div id="overlayCronologia" class="overlay hidden">
+      <div class="overlay-box" id="overlayCronologiaContenuto"></div>
+    </div>
+
+    <!-- SCHERMATA: finale -->
+    <section id="schermataFinaleTeam" class="schermata hidden">
+      <div class="card centro">
+        <h2>Sessione conclusa</h2>
+        <div class="posizione-finale">Posizione: <span id="posizioneFinale">—</span></div>
+        <div class="punteggio-finale">Punteggio: <span id="punteggioFinale">—</span></div>
+      </div>
+      <div class="card centro profilo-finale-card">
+        <h3 id="profiloLabel">—</h3>
+        <p id="profiloDescrizione" class="muted"></p>
+        <p class="tendenza">Tendenza secondaria: <span id="profiloTendenza">—</span></p>
+      </div>
+      <div id="cardEpilogoFinale" class="card centro profilo-finale-card hidden">
+        <h3 id="epilogoTitolo">Una settimana senza di voi</h3>
+        <p id="epilogoTesto" class="muted"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <template id="templateCollaboratore">
+    <div class="collaboratore-card cliccabile">
+      <div class="riga-nome-stelle">
+        <h4 class="nome-collaboratore"></h4>
+        <span class="stelle-overall"></span>
+      </div>
+      <div class="barre-stat-collaboratore"></div>
+      <div class="riga-categoria-richiesta">
+        <select class="select-categoria"></select>
+        <span class="richiesta-inline"></span>
+      </div>
+      <div class="azione-corrente muted"></div>
+    </div>
+  </template>
+
+  <template id="templateClassificazione">
+    <div class="collaboratore-card">
+      <div class="riga-nome-stelle">
+        <h4 class="nome-collaboratore"></h4>
+        <span class="stelle-overall"></span>
+      </div>
+      <div class="barre-stat-collaboratore"></div>
+      <select class="select-categoria"></select>
+    </div>
+  </template>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="team.js"></script>
+</body>
+</html>

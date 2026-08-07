@@ -1,0 +1,36 @@
+{
+  "_note": "Epilogo narrativo di fine sessione ('una settimana senza di voi'): valutato una volta a tavolo dopo l'ultimo round, in ordine di priorita' (il primo scenario le cui condizioni sono soddisfatte vince). Le condizioni usano le metriche dell'ultimo round giocato (punteggiPerRound) e il conteggio dei collaboratori usciti dalla rete.",
+  "titoloSezione": "Una settimana senza di voi",
+  "scenari": [
+    {
+      "id": "rete_in_crisi",
+      "condizioni": { "usciriDallaReteMin": 1 },
+      "titolo": "La rete si è ridotta",
+      "template": "Immaginate di essere lontani per una settimana, irraggiungibili. {numUsciti} persona/e ha/hanno smesso di contare su di voi molto prima di questa settimana: {nomiUsciti} non fa/fanno più parte della vostra rete. Chi resta si organizza, ma lo fa anche perché ha imparato a non aspettarvi. Non è indipendenza: è distanza."
+    },
+    {
+      "id": "rete_autonoma",
+      "condizioni": { "autonomiaMediaMin": 65, "rischioTurnoverMedioMax": 30 },
+      "titolo": "La rete ha retto da sola",
+      "template": "Immaginate di essere lontani per una settimana, irraggiungibili. Le decisioni chiave vengono prese senza di voi. Chi ha bisogno di un confronto lo trova in un collega, non solo in voi. Al rientro, la rete non vi ha aspettato: ha semplicemente continuato a funzionare. È il segno più concreto che il tempo speso è diventato autonomia, non dipendenza."
+    },
+    {
+      "id": "rete_a_rischio",
+      "condizioni": { "rischioTurnoverMedioMin": 50 },
+      "titolo": "Il silenzio pesa",
+      "template": "Immaginate di essere lontani per una settimana, irraggiungibili. Il telefono non squilla quasi più: non perché la rete non abbia bisogno di voi, ma perché ha smesso di aspettarselo. Al vostro ritorno, qualcuno inizia una frase con \"stavo giusto pensando di...\". Non fatevi illudere dal silenzio: a volte è il sintomo più forte di un problema, non la sua assenza."
+    },
+    {
+      "id": "rete_dipendente",
+      "condizioni": { "autonomiaMediaMax": 40 },
+      "titolo": "Tutto si ferma",
+      "template": "Immaginate di essere lontani per una settimana, irraggiungibili. Le richieste si accumulano senza risposta. Alcune decisioni, anche piccole, restano in sospeso perché nessuno si sente autorizzato a prenderle senza di voi. Al rientro trovate una pila di cose in attesa: la rete non ha ancora imparato a muoversi senza la vostra presenza costante."
+    },
+    {
+      "id": "rete_in_transizione",
+      "condizioni": {},
+      "titolo": "Un equilibrio ancora fragile",
+      "template": "Immaginate di essere lontani per una settimana, irraggiungibili. Qualcosa la rete riesce a gestirlo da sola, qualcos'altro resta in attesa del vostro ritorno. Non è un fallimento: è una fase di transizione, il punto in cui l'autonomia costruita finora non è ancora abbastanza solida da reggere del tutto senza di voi."
+    }
+  ]
+}

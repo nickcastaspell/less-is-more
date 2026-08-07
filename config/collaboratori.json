@@ -1,0 +1,66 @@
+{
+  "_note": "Ogni collaboratore appartiene a un cluster interno (non dichiarato ai partecipanti, usato solo dal motore per calcolare gli effetti). In Fase 1 il tavolo assegna una propria categoria (vedi categorieClassificazione) che resta l'etichetta mostrata in app per tutta la partita, indipendentemente dal cluster reale.",
+  "categorieClassificazione": ["Investirei", "Monitorerei", "Lascerei autonomo"],
+  "clusterDefinitions": {
+    "performer": {
+      "label": "Performer",
+      "descrizioneInterna": "Produce risultati, richiede poca supervisione. Rischio: diventare dipendente dal manager se seguito troppo.",
+      "propensioneRichiesta": 15,
+      "richiesteTipiche": ["Vuole una nuova sfida", "Chiede un riconoscimento formale", "Propone un'idea da testare"]
+    },
+    "potenziale": {
+      "label": "Potenziale",
+      "descrizioneInterna": "Motivazione alta, competenze ancora limitate. Collaboratore su cui l'affiancamento produce il maggior ritorno.",
+      "propensioneRichiesta": 45,
+      "richiesteTipiche": ["Chiede affiancamento", "Vuole prepararsi alla certificazione", "Chiede un feedback sull'ultimo lavoro"]
+    },
+    "resistente": {
+      "label": "Resistente al cambiamento",
+      "descrizioneInterna": "Assorbe molto tempo, produce miglioramenti limitati. Può richiedere strategie diverse, inclusa la surroga.",
+      "propensioneRichiesta": 70,
+      "richiesteTipiche": ["Ha perso un cliente", "Vuole confrontarsi su un problema", "Si lamenta del carico di lavoro"]
+    }
+  },
+  "templateSquadra": [
+    {
+      "id": "c1",
+      "nome": "Marco Ferrari",
+      "cluster": "performer",
+      "stats": { "competenza": 82, "autonomia": 78, "motivazione": 70, "resilienza": 65, "velocitaApprendimento": 55, "fiducia": 70, "risultati": 75 }
+    },
+    {
+      "id": "c2",
+      "nome": "Giulia Conti",
+      "cluster": "performer",
+      "stats": { "competenza": 88, "autonomia": 85, "motivazione": 60, "resilienza": 60, "velocitaApprendimento": 50, "fiducia": 65, "risultati": 80 }
+    },
+    {
+      "id": "c3",
+      "nome": "Sara Bianchi",
+      "cluster": "potenziale",
+      "stats": { "competenza": 40, "autonomia": 35, "motivazione": 88, "resilienza": 70, "velocitaApprendimento": 82, "fiducia": 75, "risultati": 45 }
+    },
+    {
+      "id": "c4",
+      "nome": "Luca Romano",
+      "cluster": "potenziale",
+      "stats": { "competenza": 45, "autonomia": 40, "motivazione": 80, "resilienza": 60, "velocitaApprendimento": 75, "fiducia": 68, "risultati": 48 }
+    },
+    {
+      "id": "c5",
+      "nome": "Paolo Greco",
+      "cluster": "resistente",
+      "stats": { "competenza": 60, "autonomia": 55, "motivazione": 35, "resilienza": 40, "velocitaApprendimento": 30, "fiducia": 40, "risultati": 50 }
+    },
+    {
+      "id": "c6",
+      "nome": "Elena Rizzo",
+      "cluster": "resistente",
+      "stats": { "competenza": 55, "autonomia": 50, "motivazione": 30, "resilienza": 35, "velocitaApprendimento": 28, "fiducia": 38, "risultati": 47 }
+    }
+  ],
+  "campiVisibiliAiPartecipanti": ["nome", "competenza", "autonomia", "motivazione", "resilienza", "velocitaApprendimento", "risultati"],
+  "sogliaTurnoverRischio": 30,
+  "rondeConsecutiveMotivazioneBassaPerTurnover": 2,
+  "sogliaMotivazioneBassa": 35
+}

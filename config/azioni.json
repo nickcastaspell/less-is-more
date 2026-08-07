@@ -1,0 +1,82 @@
+{
+  "_note": "effetti.immediato si applica nel round corrente. effetti.differito si applica all'inizio del round successivo (impatto ritardato tipico del framework).",
+  "azioni": {
+    "shadowing": {
+      "label": "Shadowing operativo",
+      "costoOre": 4,
+      "effetti": {
+        "performer":   { "immediato": { "risultati": 4,  "motivazione": -2 }, "differito": { "autonomia": -6, "motivazione": -5, "fiducia": -3 } },
+        "potenziale":  { "immediato": { "risultati": 5,  "autonomia": 2 },     "differito": { "autonomia": 3,  "competenza": 2 } },
+        "resistente":  { "immediato": { "risultati": 3 },                     "differito": { "autonomia": 1,  "competenza": 1 } }
+      }
+    },
+    "coaching": {
+      "label": "Coaching",
+      "costoOre": 3,
+      "effetti": {
+        "performer":   { "immediato": { "motivazione": 2 },                   "differito": { "competenza": 2,  "autonomia": 1 } },
+        "potenziale":  { "immediato": { "motivazione": 6 },                   "differito": { "competenza": 9,  "autonomia": 7, "fiducia": 5 } },
+        "resistente":  { "immediato": { "motivazione": -1 },                  "differito": { "competenza": 2,  "autonomia": 1, "motivazione": 1 } }
+      }
+    },
+    "feedback": {
+      "label": "Feedback strutturato",
+      "costoOre": 2,
+      "effetti": {
+        "performer":   { "immediato": { "motivazione": 5, "fiducia": 4 },     "differito": { "fiducia": 3 } },
+        "potenziale":  { "immediato": { "motivazione": 4, "competenza": 2 },  "differito": { "fiducia": 3,  "competenza": 2 } },
+        "resistente":  { "immediato": { "motivazione": -4 },                  "differito": { "motivazione": 3,  "fiducia": 1 } }
+      }
+    },
+    "monitoraggio": {
+      "label": "Monitoraggio",
+      "costoOre": 2,
+      "effetti": {
+        "performer":   { "immediato": { "motivazione": -3 },                  "differito": { "fiducia": -2 } },
+        "potenziale":  { "immediato": { "motivazione": -1 },                  "differito": { "autonomia": -1 } },
+        "resistente":  { "immediato": { "risultati": 1 },                     "differito": { "motivazione": -3, "climaTeam": -1 } }
+      }
+    },
+    "delega": {
+      "label": "Delega",
+      "costoOre": 1,
+      "effetti": {
+        "performer":   { "immediato": { "autonomia": 4, "motivazione": 4 },   "differito": { "fiducia": 4,  "risultati": 2 } },
+        "potenziale":  { "immediato": { "risultati": -4, "autonomia": 2 },    "differito": { "autonomia": 3,  "competenza": 2 } },
+        "resistente":  { "immediato": { "risultati": -8 },                    "differito": { "motivazione": -2, "climaTeam": -1 } }
+      }
+    },
+    "surroga": {
+      "label": "Surroga",
+      "costoOre": 3,
+      "effetti": {
+        "performer":   { "immediato": { "risultati": 6, "motivazione": -6 },  "differito": { "fiducia": -5, "autonomia": -3 } },
+        "potenziale":  { "immediato": { "risultati": 6 },                     "differito": { "competenza": 0, "motivazione": -1 } },
+        "resistente":  { "immediato": { "risultati": 7 },                     "differito": { "motivazione": -1, "climaTeam": -2 } }
+      },
+      "penalitaClimaSeUsoRipetuto": { "sogliaUsiConsecutivi": 2, "climaTeam": -3 }
+    },
+    "visitaProattiva": {
+      "label": "Visita proattiva",
+      "costoOre": 2,
+      "descrizione": "Andare tu verso chi non ha chiesto nulla questo turno, per intercettare problemi prima che si aggravino.",
+      "effetti": {
+        "performer":   { "immediato": { "motivazione": 3, "fiducia": 2 },     "differito": { "fiducia": 2 } },
+        "potenziale":  { "immediato": { "motivazione": 3, "competenza": 1 },  "differito": { "autonomia": 2, "fiducia": 2 } },
+        "resistente":  { "immediato": { "motivazione": 4 },                   "differito": { "motivazione": 2, "climaTeam": 1 } }
+      },
+      "note": "Non genera penalita' di trascuratezza: conta come intervento anche se il collaboratore non aveva una richiesta attiva."
+    },
+    "nessunIntervento": {
+      "label": "Nessun intervento",
+      "costoOre": 0,
+      "effetti": {
+        "performer":   { "immediato": {},                                    "differito": { "motivazione": -1 } },
+        "potenziale":  { "immediato": {},                                    "differito": { "motivazione": -3, "competenza": -1 } },
+        "resistente":  { "immediato": {},                                    "differito": { "risultati": -2 } }
+      },
+      "note": "Su un collaboratore trascurato per 3+ round consecutivi, il rischio di turnover aumenta indipendentemente dal cluster."
+    }
+  },
+  "rondeConsecutiveTrascuratoPerRischio": 3
+}

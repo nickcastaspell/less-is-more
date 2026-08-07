@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Less is More — Regia Facilitatore</title>
+<link rel="stylesheet" href="facilitator.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-title">LESS IS MORE</span>
+      <span class="brand-subtitle">Leadership Through Smart Resource Allocation — Regia</span>
+    </div>
+    <div id="statoSessioneBadge" class="badge hidden"></div>
+  </header>
+
+  <main id="app">
+
+    <!-- SCHERMATA 1: creazione sessione -->
+    <section id="schermataCreazione" class="schermata">
+      <div class="card card-form">
+        <h2>Nuova sessione</h2>
+        <label>Nome sessione
+          <input type="text" id="inputNomeSessione" placeholder="Es. Convention Rete Vendita 2026" />
+        </label>
+        <div class="riga-form">
+          <label>Numero tavoli
+            <input type="number" id="inputNumeroTavoli" value="4" min="1" max="20" />
+          </label>
+          <label>Settimane di Fase 2 (Scegliere)
+            <input type="number" id="inputNumeroRound" value="5" min="1" max="10" />
+          </label>
+          <label>Settimane di Fase 4 (Consolidare)
+            <input type="number" id="inputNumeroRoundFase4" value="3" min="1" max="10" />
+          </label>
+          <label>Ore manageriali/settimana
+            <input type="number" id="inputOrePerRound" value="10" min="1" max="30" />
+          </label>
+        </div>
+        <p class="muted" style="margin-top:-8px;">Fase 1 (classificazione) e Fase 3 (crisi, 1 settimana fissa) si aggiungono automaticamente.</p>
+        <label>Nomi dei tavoli (opzionale, uno per riga — altrimenti "Tavolo 1", "Tavolo 2"...)
+          <textarea id="inputNomiTavoli" rows="4" placeholder="Tavolo Nord&#10;Tavolo Sud&#10;Tavolo Est&#10;Tavolo Ovest"></textarea>
+        </label>
+        <button id="btnCreaSessione" class="btn btn-primario">Crea sessione e genera i link</button>
+      </div>
+
+      <div class="card card-form">
+        <h2>Riprendi una sessione</h2>
+        <label>ID sessione
+          <input type="text" id="inputResumeId" placeholder="Es. 38026764" />
+        </label>
+        <label>Token facilitatore
+          <input type="text" id="inputResumeToken" placeholder="Ricevuto alla creazione (auto-compilato se stessa sessione/browser)" />
+        </label>
+        <p class="muted" style="margin-top:-8px;">Il token viene richiesto solo se non e' gia' salvato in questo browser dalla creazione della sessione.</p>
+        <button id="btnResume" class="btn btn-secondario">Riprendi</button>
+        <div id="listaSessioniEsistenti" class="lista-sessioni"></div>
+      </div>
+    </section>
+
+    <!-- SCHERMATA 2: sala d'attesa (link/QR per i tavoli) -->
+    <section id="schermataSalaAttesa" class="schermata hidden">
+      <div class="card">
+        <h2>Sala d'attesa — condividi il link con ciascun tavolo</h2>
+        <p class="muted">Ogni tavolo apre il proprio link (o scansiona il proprio QR) dal telefono/tablet. Quando tutti sono collegati, passa alla Fase 1.</p>
+        <div id="grigliaLinkTavoli" class="griglia-link-tavoli"></div>
+        <button id="btnVaiRegia" class="btn btn-primario">Vai alla regia →</button>
+      </div>
+    </section>
+
+    <!-- SCHERMATA 2b: Fase 1 - classificazione -->
+    <section id="schermataFase1" class="schermata hidden">
+      <div class="card">
+        <h2>Fase 1 — Conoscere</h2>
+        <p class="muted">I tavoli leggono le schede cartacee e classificano ogni collaboratore in app (Investirei / Monitorerei / Lascerei autonomo). Quando ritieni che abbiano finito, passa alla Fase 2 — la categoria resterà comunque modificabile per tutta la partita.</p>
+        <div id="grigliaFase1" class="griglia-tavoli"></div>
+        <button id="btnTerminaFase1" class="btn btn-primario">Passa alla Fase 2 →</button>
+      </div>
+    </section>
+
+    <!-- SCHERMATA 3: regia live -->
+    <section id="schermataRegia" class="schermata hidden">
+      <div class="regia-header card">
+        <div>
+          <div class="round-indicator"><span id="faseBadge" class="fase-badge">Fase 2</span> Settimana <span id="roundCorrente">1</span> / <span id="roundTotale">5</span></div>
+          <div id="statoRoundLabel" class="stato-round-label">In attesa di avvio</div>
+          <div id="timerRound" class="timer-round hidden">⏱ <span id="timerRoundValore">--:--</span> <button id="btnRiavviaTimer" class="btn-link">riavvia</button></div>
+          <div class="durata-round-box">
+            <label for="inputDurataRound">Durata settimana</label>
+            <input type="number" id="inputDurataRound" min="0.5" max="60" step="0.5" value="5" />
+            <span class="muted">min</span>
+          </div>
+        </div>
+        <div class="regia-azioni">
+          <button id="btnAvviaRound" class="btn btn-primario">Avvia Settimana</button>
+          <button id="btnChiudiRound" class="btn btn-attenzione hidden">Chiudi Settimana</button>
+          <button id="btnPausa" class="btn btn-secondario hidden">Pausa</button>
+          <button id="btnMostraEventi" class="btn btn-secondario">Inietta evento</button>
+          <button id="btnMostraLink" class="btn btn-secondario">Link tavoli</button>
+          <button id="btnMostraBackup" class="btn btn-secondario">Backup</button>
+        </div>
+      </div>
+
+      <div id="bannerPausa" class="card banner-pausa hidden">
+        <h3>⏸ Sessione in pausa</h3>
+        <p class="muted">I tavoli non possono modificare le proprie scelte finché non riprendi. Usalo per gestire imprevisti senza perdere lo stato della settimana.</p>
+      </div>
+
+      <div id="bannerCrisi" class="card banner-crisi hidden">
+        <h3>Fase 3 — Crisi in corso</h3>
+        <p id="testoCrisi" class="muted"></p>
+      </div>
+
+      <div id="pannelloEventi" class="card hidden">
+        <h3>Inietta un evento</h3>
+        <select id="selectEvento"></select>
+        <select id="selectTavoloEvento"><option value="">Tutti i tavoli</option></select>
+        <button id="btnInviaEvento" class="btn btn-primario">Applica evento</button>
+      </div>
+
+      <div id="pannelloBackup" class="card hidden">
+        <h3>Backup / checkpoint</h3>
+        <p class="muted">Salva uno stato della sessione a cui tornare se qualcosa va storto (es. prima della settimana di crisi). Il ripristino è visibile a tutti i tavoli.</p>
+        <button id="btnSalvaBackup" class="btn btn-primario">Salva checkpoint ora</button>
+        <div id="listaBackup" class="lista-sessioni" style="margin-top:12px;"></div>
+      </div>
+
+      <div class="card">
+        <h3>Tavoli in gioco</h3>
+        <div id="grigliaTavoli" class="griglia-tavoli"></div>
+      </div>
+
+      <div id="cardRichiesteManager" class="card hidden">
+        <h3>Richieste al manager — indicatore di autonomia della rete</h3>
+        <p class="muted">Meno richieste arrivano nel tempo, più la squadra è diventata capace di fare a meno di te.</p>
+        <div id="grigliaGraficiRichieste" class="griglia-grafici-richieste"></div>
+      </div>
+
+      <div class="card">
+        <h3>Classifica live</h3>
+        <table class="tabella-classifica">
+          <thead><tr><th>#</th><th>Tavolo</th><th>Performance</th><th>Crescita</th><th>Autonomia</th><th>Clima</th></tr></thead>
+          <tbody id="corpoClassificaLive"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SCHERMATA 4: risultati finali -->
+    <section id="schermataFinale" class="schermata hidden">
+      <div class="card">
+        <h2>Classifica finale</h2>
+        <table class="tabella-classifica tabella-classifica-finale">
+          <thead><tr><th>#</th><th>Tavolo</th><th>Performance</th><th>Crescita collaboratori</th><th>Efficienza tempo</th><th>Autonomia</th><th>Clima</th><th>Sostenibilità</th><th>Punteggio</th></tr></thead>
+          <tbody id="corpoClassificaFinale"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>Profilo manageriale per tavolo</h2>
+        <div id="grigliaProfiliFinali" class="griglia-profili"></div>
+      </div>
+      <div class="card">
+        <h2>Una settimana senza di voi</h2>
+        <p class="muted">Epilogo narrativo per tavolo, basato su come è cambiata la rete durante la sessione.</p>
+        <div id="grigliaEpiloghiFinali" class="griglia-profili"></div>
+      </div>
+      <div class="card">
+        <h2>Richieste al manager — evoluzione per tavolo</h2>
+        <p class="muted">Il miglior DLG è quello che, alla fine, serve meno: non perché lavora meno, ma perché ha costruito una squadra che funziona senza dipendere continuamente da lui.</p>
+        <div id="grigliaGraficiRichiesteFinale" class="griglia-grafici-richieste"></div>
+      </div>
+      <div class="card">
+        <h2>Log decisioni — per il debrief</h2>
+        <p class="muted">Rivedi settimana per settimana cosa ha scelto ogni tavolo: utile per confrontare le decisioni con gli effetti osservati.</p>
+        <select id="selectTavoloLog"></select>
+        <div class="tabella-log-wrapper">
+          <table class="tabella-classifica tabella-log">
+            <thead><tr><th>Settimana</th><th>Collaboratore</th><th>Cluster</th><th>Azione scelta</th><th>Ore</th></tr></thead>
+            <tbody id="corpoLogDecisioni"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Debrief — domande guida</h2>
+        <ul class="lista-debrief">
+          <li>Come avete deciso su chi investire il vostro tempo?</li>
+          <li>Quali collaboratori avete scelto di non seguire?</li>
+          <li>Quali decisioni hanno prodotto effetti inattesi?</li>
+          <li>Quanto tempo avete dedicato ai collaboratori ad alto potenziale rispetto a quelli che assorbivano più energie?</li>
+          <li>Nel turno in cui nessuno ha chiamato, cosa avete fatto? Avete aspettato o siete andati voi?</li>
+          <li>La vostra classificazione iniziale (Fase 1) ha retto nel tempo, o avete dovuto spostare qualcuno di categoria?</li>
+          <li>In Fase 4, come siete passati da "chi seguo" a "come evito di dover sempre seguire le stesse persone"?</li>
+          <li>Quando la presenza del manager crea valore e quando, invece, limita l'autonomia?</li>
+          <li>Qual è il vero significato di Less is More nella gestione di una rete commerciale?</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="facilitator.js"></script>
+</body>
+</html>

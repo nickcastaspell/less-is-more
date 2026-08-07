@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LESS IS MORE — Mockup "scrivania del DLG"</title>
+<style>
+  :root {
+    --navy-950: #0b1220;
+    --navy-900: #101a30;
+    --navy-800: #16233f;
+    --navy-700: #1e2f50;
+    --navy-600: #2a3f66;
+    --gold-400: #d9b45c;
+    --gold-300: #e8ca87;
+    --text-primary: #eef1f6;
+    --text-muted: #9aa7bd;
+    --green-ok: #4caf7d;
+    --red-warn: #d9614f;
+    --amber-warn: #d9a24f;
+    --purple-info: #a98fd1;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--navy-950); color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  }
+  .hidden { display: none !important; }
+
+  .nota-progetto {
+    background: var(--navy-800); border-bottom: 1px solid var(--gold-400);
+    padding: 10px 20px; font-size: 0.78rem; color: var(--text-muted); text-align: center;
+  }
+  .nota-progetto strong { color: var(--gold-300); }
+
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    padding: 14px 24px; background: linear-gradient(180deg, var(--navy-900), var(--navy-950));
+    border-bottom: 1px solid var(--navy-700); position: sticky; top: 0; z-index: 30;
+  }
+  .brand-title { font-weight: 700; letter-spacing: 3px; color: var(--gold-400); font-size: 1rem; }
+
+  /* ---------- Le 4 aree della scrivania ---------- */
+  .scrivania-nav {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    padding: 14px 16px; max-width: 640px; margin: 0 auto;
+  }
+  .zona-btn {
+    position: relative; flex: 1; min-width: 120px; background: var(--navy-900); border: 1px solid var(--navy-700);
+    color: var(--text-muted); padding: 12px 10px; border-radius: var(--radius); cursor: pointer;
+    font-size: 0.8rem; text-align: center; line-height: 1.4;
+  }
+  .zona-btn .zona-icona { font-size: 1.3rem; display: block; margin-bottom: 4px; }
+  .zona-btn.attiva { border-color: var(--gold-400); background: var(--navy-800); color: var(--gold-300); }
+  .zona-btn:hover:not(.attiva) { border-color: var(--navy-600); color: var(--text-primary); }
+  .zona-badge {
+    position: absolute; top: -6px; right: -6px; background: var(--red-warn); color: #fff;
+    font-size: 0.68rem; font-weight: 700; border-radius: 10px; padding: 2px 6px; min-width: 18px;
+  }
+
+  main { max-width: 640px; margin: 0 auto; padding: 6px 16px 90px; }
+  .schermata-mock { display: none; }
+  .schermata-mock.attiva { display: block; }
+
+  .titolo-zona { text-align: center; margin-bottom: 16px; }
+  .titolo-zona h1 { margin: 0; letter-spacing: 3px; font-size: 1.15rem; color: var(--gold-300); }
+  .titolo-zona p { margin: 6px 0 0; font-size: 0.8rem; color: var(--text-muted); }
+
+  /* ---------- Telefono ---------- */
+  .telefono-shell {
+    background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: 22px;
+    padding: 10px; max-width: 340px; margin: 0 auto;
+  }
+  .telefono-header { text-align: center; padding: 8px 0 4px; font-size: 0.75rem; color: var(--text-muted); }
+  .lista-notifiche { display: flex; flex-direction: column; gap: 8px; padding: 6px; min-height: 80px; }
+  .notifica-item {
+    display: flex; gap: 10px; align-items: flex-start; background: var(--navy-800); border: 1px solid var(--navy-600);
+    border-radius: 10px; padding: 10px 12px; cursor: pointer; text-align: left;
+  }
+  .notifica-item:hover { border-color: var(--gold-400); }
+  .notifica-avatar { font-size: 1.3rem; flex-shrink: 0; }
+  .notifica-testo .notifica-nome { font-weight: 700; font-size: 0.85rem; color: var(--gold-300); }
+  .notifica-testo .notifica-anteprima { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+  .notifica-vuota { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 20px 10px; }
+
+  /* ---------- Overlay condiviso (dettaglio richiesta) ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(6, 10, 20, 0.82); z-index: 40;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .overlay-box {
+    background: var(--navy-900); border: 1px solid var(--gold-400); border-radius: var(--radius);
+    max-width: 440px; width: 100%; padding: 26px; text-align: center;
+  }
+  .overlay-box h2 { margin: 0 0 4px; letter-spacing: 2px; color: var(--gold-300); }
+  .overlay-box .sottotitolo { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; }
+  .overlay-box .narrativa { font-size: 0.92rem; line-height: 1.6; margin-bottom: 18px; text-align: left; }
+  .opzioni-azione { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; text-align: left; }
+  .opzione-riga {
+    display: flex; align-items: center; gap: 10px; background: var(--navy-800); border: 1px solid var(--navy-600);
+    border-radius: 8px; padding: 10px 12px; cursor: pointer; font-size: 0.88rem;
+  }
+  .opzione-riga:hover { border-color: var(--gold-400); }
+  .opzione-riga input { accent-color: var(--gold-400); }
+  .tempo-richiesto { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; }
+  .tempo-richiesto strong { color: var(--gold-300); font-size: 1.1rem; }
+  .btn-conferma {
+    width: 100%; background: var(--gold-400); color: var(--navy-950); border: none; border-radius: 8px;
+    padding: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  }
+  .btn-conferma:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-chiudi-overlay {
+    background: none; border: none; color: var(--text-muted); font-size: 0.78rem; cursor: pointer;
+    margin-top: 10px; text-decoration: underline;
+  }
+
+  /* ---------- Toast cross-zona ---------- */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--gold-400); color: var(--navy-950); padding: 10px 18px; border-radius: 20px;
+    font-size: 0.8rem; font-weight: 600; opacity: 0; transition: all 0.3s ease; z-index: 50; pointer-events: none;
+  }
+  .toast.mostra { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Team ---------- */
+  .griglia-card-collab { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .card-collab {
+    background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: var(--radius);
+    padding: 16px; cursor: pointer;
+  }
+  .card-collab:hover { border-color: var(--gold-400); }
+  .card-collab .nome-riga { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .card-collab h3 { margin: 0; font-size: 1rem; color: var(--text-primary); }
+  .stelle { color: var(--gold-400); font-size: 0.85rem; letter-spacing: 1px; }
+  .riga-stat { font-size: 0.75rem; color: var(--text-muted); margin: 8px 0 2px; display: flex; justify-content: space-between; }
+  .barra-track { width: 100%; height: 10px; background: var(--navy-700); border-radius: 6px; overflow: hidden; margin-top: 6px; }
+  .barra-fill { height: 100%; background: var(--gold-400); border-radius: 6px; transition: width 0.4s ease; }
+  .ultimo-evento { font-size: 0.75rem; color: var(--text-muted); font-style: italic; margin: 10px 0 0; min-height: 2.2em; }
+  .tag-in-agenda { display: inline-block; margin-top: 6px; font-size: 0.68rem; color: var(--green-ok); border: 1px solid var(--green-ok); border-radius: 10px; padding: 2px 8px; }
+
+  .timeline-mini { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--navy-700); text-align: left; }
+  .timeline-mini-item { display: flex; gap: 8px; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px; }
+  .timeline-mini-item .ic { flex-shrink: 0; }
+
+  /* ---------- Cruscotto ---------- */
+  .griglia-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+  .kpi-card { background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: var(--radius); padding: 16px; }
+  .kpi-card .kpi-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .kpi-card .kpi-valore { font-size: 1.8rem; font-weight: 700; color: var(--gold-300); }
+  .kpi-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+
+  /* ---------- Agenda ---------- */
+  .agenda-ore-box { background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; text-align: center; }
+  .agenda-ore-box .valore-grande { font-size: 1.6rem; font-weight: 700; color: var(--gold-300); margin: 6px 0; }
+  .agenda-lista-titolo { font-size: 0.82rem; color: var(--text-muted); margin: 18px 0 8px; }
+  .agenda-azione-riga {
+    display: flex; justify-content: space-between; align-items: center; background: var(--navy-900);
+    border: 1px solid var(--navy-700); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; font-size: 0.85rem;
+  }
+  .agenda-azione-riga .chi { color: var(--gold-300); font-weight: 600; }
+  .agenda-azione-riga .cosa { color: var(--text-muted); font-size: 0.78rem; }
+  .agenda-vuota { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 16px; }
+
+  .nota-legenda { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 22px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+  <div class="nota-progetto">
+    Mockup statico non funzionante — dati finti, nessuna connessione al gioco reale.
+    <strong>Serve solo a mostrare l'idea della "scrivania" a 4 aree: prova ad accettare una richiesta dal Telefono e guarda cosa cambia in Agenda.</strong>
+  </div>
+
+  <header class="topbar">
+    <span class="brand-title">LESS IS MORE — SCRIVANIA (MOCKUP)</span>
+  </header>
+
+  <nav class="scrivania-nav">
+    <button class="zona-btn attiva" data-zona="telefono">
+      <span class="zona-icona">📱</span>Telefono
+      <span class="zona-badge hidden" id="badgeTelefono">0</span>
+    </button>
+    <button class="zona-btn" data-zona="team">
+      <span class="zona-icona">👥</span>Team
+    </button>
+    <button class="zona-btn" data-zona="cruscotto">
+      <span class="zona-icona">📊</span>Cruscotto
+    </button>
+    <button class="zona-btn" data-zona="agenda">
+      <span class="zona-icona">📅</span>Agenda
+    </button>
+  </nav>
+
+  <main id="app">
+
+    <!-- ================= TELEFONO ================= -->
+    <section id="zona-telefono" class="schermata-mock attiva">
+      <div class="titolo-zona">
+        <h1>📱 TELEFONO</h1>
+        <p>Le richieste dei collaboratori arrivano qui, come notifiche. Toccale per aprirle.</p>
+      </div>
+      <div class="telefono-shell">
+        <div class="telefono-header">● ● ●&nbsp;&nbsp;Round 3</div>
+        <div class="lista-notifiche" id="listaNotifiche"></div>
+      </div>
+    </section>
+
+    <!-- ================= TEAM ================= -->
+    <section id="zona-team" class="schermata-mock">
+      <div class="titolo-zona">
+        <h1>👥 TEAM</h1>
+        <p>Le schede dei tuoi collaboratori. Aprine una per vedere la sua cronologia.</p>
+      </div>
+      <div class="griglia-card-collab" id="grigliaCardCollab"></div>
+    </section>
+
+    <!-- ================= CRUSCOTTO ================= -->
+    <section id="zona-cruscotto" class="schermata-mock">
+      <div class="titolo-zona">
+        <h1>📊 CRUSCOTTO</h1>
+        <p>Come sta andando la rete nel suo insieme, non il singolo collaboratore.</p>
+      </div>
+      <div class="griglia-kpi">
+        <div class="kpi-card">
+          <div class="kpi-label">🏆 Performance rete</div>
+          <div class="kpi-valore">74</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">😊 Clima</div>
+          <div class="kpi-valore">78</div>
+          <div class="kpi-sub">su 100</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">⚡ Autonomia squadra</div>
+          <div class="kpi-valore">61</div>
+          <div class="kpi-sub">su 100</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">📈 Evoluzione</div>
+          <div class="kpi-valore" style="font-size:1.2rem;color:var(--green-ok);">▲ positiva</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= AGENDA ================= -->
+    <section id="zona-agenda" class="schermata-mock">
+      <div class="titolo-zona">
+        <h1>📅 AGENDA</h1>
+        <p>Le ore disponibili per questo round e cosa hai già pianificato.</p>
+      </div>
+      <div class="agenda-ore-box">
+        <div style="font-size:0.78rem;color:var(--text-muted);">Ore manageriali disponibili</div>
+        <div class="valore-grande"><span id="agendaOreResidue">10</span>/10</div>
+        <div class="barra-track"><div class="barra-fill" id="agendaBarraOre" style="width:100%"></div></div>
+      </div>
+      <div class="agenda-lista-titolo">Azioni pianificate questo round</div>
+      <div id="agendaListaAzioni"></div>
+    </section>
+
+  </main>
+
+  <!-- Overlay richiesta -->
+  <div class="overlay hidden" id="overlayRichiesta">
+    <div class="overlay-box" id="overlayBoxContenuto"></div>
+  </div>
+
+  <!-- Overlay scheda team (sola lettura) -->
+  <div class="overlay hidden" id="overlayScheda">
+    <div class="overlay-box" id="overlaySchedaContenuto"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const collaboratoriMock = [
+    {
+      id: 'marco', nome: 'Marco', stelle: 4, motivazione: 70, autonomia: 78,
+      ultimoEvento: 'Ha concluso una vendita importante.',
+      richiesta: { testo: "Vorrebbe un affiancamento prima dell'incontro con un nuovo cliente.", ore: 2,
+        narrativa: 'Marco ha appena acquisito un nuovo cliente importante. È motivato ma non ha mai gestito un cliente di queste dimensioni.' },
+      timeline: [
+        { ic: '✔', testo: 'Ha acquisito un nuovo cliente', round: 'Round 3' },
+        { ic: '✔', testo: 'Coaching ricevuto prima del colloquio', round: 'Round 2' }
+      ]
+    },
+    {
+      id: 'sara', nome: 'Sara', stelle: 3, motivazione: 88, autonomia: 35,
+      ultimoEvento: 'Sta preparando la certificazione.',
+      richiesta: { testo: "Chiede un feedback sull'ultimo lavoro consegnato.", ore: 2,
+        narrativa: 'Sara ha consegnato il suo primo lavoro autonomo. È molto motivata ma insicura sulla qualità del risultato.' },
+      timeline: [
+        { ic: '✔', testo: 'Certificazione completata', round: 'Round 1' },
+        { ic: '⚠', testo: 'Prima consegna autonoma, in attesa di feedback', round: 'Round 3' }
+      ]
+    },
+    {
+      id: 'paolo', nome: 'Paolo', stelle: 2, motivazione: 35, autonomia: 55,
+      ultimoEvento: 'Si è lamentato del carico di lavoro.',
+      richiesta: { testo: 'Ha perso un cliente e vuole confrontarsi.', ore: 3,
+        narrativa: "Paolo ha perso un cliente storico questa settimana. È scoraggiato e fatica a vedere una via d'uscita." },
+      timeline: [
+        { ic: '⚠', testo: 'Ha perso un cliente storico', round: 'Round 3' },
+        { ic: '⚠', testo: 'Carico di lavoro percepito come eccessivo', round: 'Round 2' }
+      ]
+    },
+    {
+      id: 'giulia', nome: 'Giulia', stelle: 5, motivazione: 60, autonomia: 85,
+      ultimoEvento: "Ha proposto un'idea in riunione.",
+      richiesta: null,
+      timeline: [
+        { ic: '✔', testo: "Ha proposto un'idea in riunione", round: 'Round 3' },
+        { ic: '✔', testo: 'Nessuna richiesta di aiuto da 2 round', round: 'Round 2' }
+      ]
+    },
+    {
+      id: 'luca', nome: 'Luca', stelle: 3, motivazione: 80, autonomia: 40,
+      ultimoEvento: 'Ha chiesto di essere affiancato la scorsa settimana.',
+      richiesta: null,
+      timeline: [
+        { ic: '✔', testo: 'Affiancamento ricevuto', round: 'Round 2' }
+      ]
+    },
+    {
+      id: 'elena', nome: 'Elena', stelle: 2, motivazione: 30, autonomia: 50,
+      ultimoEvento: 'Nessun contatto nelle ultime due settimane.',
+      richiesta: null,
+      timeline: [
+        { ic: '⚠', testo: 'Nessun contatto da due round', round: 'Round 3' }
+      ]
+    }
+  ];
+
+  const azioniMock = [
+    { id: 'coaching', label: 'Coaching', ore: 3 },
+    { id: 'shadowing', label: 'Shadowing', ore: 4 },
+    { id: 'call', label: 'Call rapida', ore: 1 },
+    { id: 'delega', label: 'Delega', ore: 1 },
+    { id: 'nessun', label: 'Nessun intervento', ore: 0 }
+  ];
+
+  const esitiPositivi = [
+    (nome) => `${nome} sorride. "Grazie, era proprio il confronto che mi serviva."`,
+    (nome) => `${nome} annuisce, più sicuro di prima.`
+  ];
+  const esitiNeutri = [
+    (nome) => `${nome} accetta l'aiuto, ma qualcosa ti dice che stavolta non era davvero necessario.`
+  ];
+
+  let oreResidueStato = 10;
+  const azioniPianificate = []; // popolata quando si accetta una richiesta dal Telefono
+
+  function renderStelle(n) { return '★'.repeat(n) + '☆'.repeat(5 - n); }
+
+  function mostraToast(testo) {
+    const t = document.getElementById('toast');
+    t.textContent = testo;
+    t.classList.add('mostra');
+    setTimeout(() => t.classList.remove('mostra'), 2200);
+  }
+
+  // ---------------- ZONA TELEFONO ----------------
+  function renderTelefono() {
+    const lista = document.getElementById('listaNotifiche');
+    const conRichiesta = collaboratoriMock.filter((c) => c.richiesta);
+    document.getElementById('badgeTelefono').textContent = conRichiesta.length;
+    document.getElementById('badgeTelefono').classList.toggle('hidden', conRichiesta.length === 0);
+
+    if (conRichiesta.length === 0) {
+      lista.innerHTML = '<div class="notifica-vuota">Nessuna notifica al momento. Passa a Team o Cruscotto.</div>';
+      return;
+    }
+    lista.innerHTML = conRichiesta.map((c) => `
+      <div class="notifica-item" data-id="${c.id}">
+        <div class="notifica-avatar">👤</div>
+        <div class="notifica-testo">
+          <div class="notifica-nome">${c.nome}</div>
+          <div class="notifica-anteprima">${c.richiesta.testo}</div>
+        </div>
+      </div>
+    `).join('');
+    lista.querySelectorAll('.notifica-item').forEach((el) => {
+      el.addEventListener('click', () => {
+        const c = collaboratoriMock.find((x) => x.id === el.dataset.id);
+        apriRichiesta(c);
+      });
+    });
+  }
+
+  function apriRichiesta(c) {
+    const overlay = document.getElementById('overlayRichiesta');
+    const box = document.getElementById('overlayBoxContenuto');
+    box.innerHTML = `
+      <h2>${c.nome.toUpperCase()}</h2>
+      <div class="sottotitolo">🔔 ${c.richiesta.testo}</div>
+      <div class="narrativa">${c.richiesta.narrativa}</div>
+      <div style="font-size:0.85rem;color:var(--gold-300);margin-bottom:10px;">Cosa fai?</div>
+      <div class="opzioni-azione" id="opzioniAzione">
+        ${azioniMock.map((a) => `
+          <label class="opzione-riga">
+            <input type="radio" name="azioneMock" value="${a.id}" data-ore="${a.ore}" data-label="${a.label}" />
+            <span>${a.label}</span>
+            <span style="margin-left:auto;color:var(--text-muted);font-size:0.75rem;">${a.ore}h</span>
+          </label>
+        `).join('')}
+      </div>
+      <div class="tempo-richiesto">Tempo richiesto: <strong id="oreSelezionate">—</strong></div>
+      <button class="btn-conferma" id="btnConfermaAzione" disabled>Conferma</button>
+      <button class="btn-chiudi-overlay" id="btnChiudiOverlay">Annulla</button>
+    `;
+    overlay.classList.remove('hidden');
+
+    const radios = box.querySelectorAll('input[name="azioneMock"]');
+    const btnConferma = document.getElementById('btnConfermaAzione');
+    radios.forEach((r) => r.addEventListener('change', () => {
+      document.getElementById('oreSelezionate').textContent = r.dataset.ore + 'h';
+      btnConferma.disabled = false;
+    }));
+
+    document.getElementById('btnChiudiOverlay').addEventListener('click', () => overlay.classList.add('hidden'));
+    btnConferma.addEventListener('click', () => {
+      const scelto = box.querySelector('input[name="azioneMock"]:checked');
+      const ore = scelto ? parseInt(scelto.dataset.ore, 10) : 0;
+      const labelAzione = scelto ? scelto.dataset.label : 'Nessun intervento';
+      mostraEsito(c, ore, labelAzione);
+    });
+  }
+
+  function mostraEsito(c, ore, labelAzione) {
+    const box = document.getElementById('overlayBoxContenuto');
+    const positivo = c.motivazione >= 50;
+    const frase = positivo
+      ? esitiPositivi[Math.floor(Math.random() * esitiPositivi.length)](c.nome)
+      : esitiNeutri[Math.floor(Math.random() * esitiNeutri.length)](c.nome);
+    box.innerHTML = `
+      <h2>${c.nome.toUpperCase()}</h2>
+      <div class="esito-narrativo" style="font-size:1rem;line-height:1.7;padding:10px 0;">${frase}</div>
+      <button class="btn-conferma" id="btnTornaTelefono">Torna al telefono</button>
+    `;
+    document.getElementById('btnTornaTelefono').addEventListener('click', () => {
+      document.getElementById('overlayRichiesta').classList.add('hidden');
+
+      // --- Questa è l'interazione cross-zona: accettare qui aggiorna Agenda e Team ---
+      oreResidueStato = Math.max(0, oreResidueStato - ore);
+      azioniPianificate.push({ collaboratore: c.nome, azione: labelAzione, ore });
+      c.richiesta = null;
+      c.ultimoEvento = frase;
+      c.inAgenda = true;
+
+      renderTelefono();
+      renderAgenda();
+      renderTeam();
+      mostraToast(`📅 Prenotato in Agenda: ${labelAzione} con ${c.nome} (${ore}h)`);
+    });
+  }
+
+  // ---------------- ZONA TEAM ----------------
+  function renderTeam() {
+    const griglia = document.getElementById('grigliaCardCollab');
+    griglia.innerHTML = collaboratoriMock.map((c) => `
+      <div class="card-collab" data-id="${c.id}">
+        <div class="nome-riga"><h3>👤 ${c.nome}</h3><span class="stelle">${renderStelle(c.stelle)}</span></div>
+        <div class="riga-stat"><span>😊 Motivazione</span><span>${c.motivazione}</span></div>
+        <div class="barra-track"><div class="barra-fill" style="width:${c.motivazione}%"></div></div>
+        <div class="riga-stat"><span>⚡ Autonomia</span><span>${c.autonomia}</span></div>
+        <div class="barra-track"><div class="barra-fill" style="width:${c.autonomia}%"></div></div>
+        <div class="ultimo-evento">🟢 "${c.ultimoEvento}"</div>
+        ${c.inAgenda ? '<span class="tag-in-agenda">✓ Azione pianificata in Agenda</span>' : ''}
+      </div>
+    `).join('');
+    griglia.querySelectorAll('.card-collab').forEach((card) => {
+      card.addEventListener('click', () => apriScheda(collaboratoriMock.find((x) => x.id === card.dataset.id)));
+    });
+  }
+
+  function apriScheda(c) {
+    const overlay = document.getElementById('overlayScheda');
+    const box = document.getElementById('overlaySchedaContenuto');
+    box.innerHTML = `
+      <h2>${c.nome.toUpperCase()}</h2>
+      <div class="sottotitolo">${renderStelle(c.stelle)}</div>
+      <div class="timeline-mini">
+        ${c.timeline.map((e) => `
+          <div class="timeline-mini-item"><span class="ic">${e.ic}</span><span>${e.testo} <em style="opacity:0.7;">(${e.round})</em></span></div>
+        `).join('')}
+      </div>
+      <button class="btn-chiudi-overlay" id="btnChiudiScheda">Chiudi</button>
+    `;
+    overlay.classList.remove('hidden');
+    document.getElementById('btnChiudiScheda').addEventListener('click', () => overlay.classList.add('hidden'));
+  }
+
+  // ---------------- ZONA AGENDA ----------------
+  function renderAgenda() {
+    document.getElementById('agendaOreResidue').textContent = oreResidueStato;
+    document.getElementById('agendaBarraOre').style.width = (oreResidueStato / 10 * 100) + '%';
+
+    const lista = document.getElementById('agendaListaAzioni');
+    if (azioniPianificate.length === 0) {
+      lista.innerHTML = '<div class="agenda-vuota">Ancora nessuna azione pianificata: apri il Telefono per rispondere alle richieste.</div>';
+      return;
+    }
+    lista.innerHTML = azioniPianificate.map((a) => `
+      <div class="agenda-azione-riga">
+        <div><span class="chi">${a.collaboratore}</span> — <span class="cosa">${a.azione}</span></div>
+        <div>${a.ore}h</div>
+      </div>
+    `).join('');
+  }
+
+  // ---------------- Navigazione tra le 4 zone ----------------
+  document.querySelectorAll('.zona-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.zona-btn').forEach((b) => b.classList.remove('attiva'));
+      btn.classList.add('attiva');
+      document.querySelectorAll('.schermata-mock').forEach((s) => s.classList.remove('attiva'));
+      document.getElementById('zona-' + btn.dataset.zona).classList.add('attiva');
+    });
+  });
+
+  renderTelefono();
+  renderTeam();
+  renderAgenda();
+</script>
+
+</body>
+</html>

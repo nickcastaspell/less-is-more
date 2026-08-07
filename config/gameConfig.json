@@ -1,0 +1,47 @@
+{
+  "_note": "numeroRound e' calcolato automaticamente alla creazione sessione come fasi.numeroRoundFase2 + fasi.numeroRoundFase3 + fasi.numeroRoundFase4 (vedi sessionManager). Le fasi 3 sono sempre round di crisi con parametri fissi in fasi.crisi.",
+  "numeroRound": 5,
+  "fasi": {
+    "numeroRoundFase2": 5,
+    "numeroRoundFase3": 1,
+    "numeroRoundFase4": 3,
+    "finestraTurnoSilenzioso": [2, 4],
+    "crisi": {
+      "titolo": "Crisi: nuovo prodotto lanciato in fretta",
+      "testo": "Un nuovo prodotto viene lanciato prima del previsto. Le ore manageriali disponibili si riducono e le richieste dalla rete si moltiplicano: chi avete sviluppato regge, chi avete trascurato fatica.",
+      "moltiplicatoreOre": 0.7,
+      "moltiplicatorePropensione": 2.5,
+      "testoImpattoTemplate": "Durante la crisi sono arrivate {richieste} richieste. Ne avete gestite {gestite}, {nonGestite} sono rimaste senza risposta. {commento}",
+      "commentoSeTutteGestite": "Con le ore ridotte non era scontato: la rete che avevate costruito ha retto.",
+      "commentoSeParzialiGestite": "Avete dovuto scegliere chi seguire e chi no: qualcuno è rimasto scoperto proprio quando serviva di più.",
+      "commentoSeNessunaGestita": "Le richieste sono arrivate più veloci di quanto abbiate potuto rispondere: la rete ha retto da sola, o ha sofferto in silenzio."
+    }
+  },
+  "fase4": {
+    "caloRichiesteSogliaPercentuale": 30,
+    "messaggioCaloRichieste": "Da quando avete iniziato ad agire sul sistema invece che sulle singole persone, le richieste dirette a voi sono diminuite: la rete si sta organizzando da sola."
+  },
+  "oreManagerialiPerRound": 10,
+  "durataRoundSecondi": 300,
+  "pesiClassifica": {
+    "performanceRete": 0.25,
+    "crescitaCollaboratori": 0.20,
+    "efficienzaTempo": 0.20,
+    "autonomiaSquadra": 0.15,
+    "clima": 0.10,
+    "sostenibilita": 0.10
+  },
+  "azioniCoerentiPerCluster": {
+    "_note": "Usato per calcolare la metrica coerenzaSituazionale: quota di azioni scelte che il framework indicherebbe come piu' efficaci per quel cluster.",
+    "performer": ["delega", "nessunIntervento", "feedback"],
+    "potenziale": ["coaching", "feedback", "shadowing"],
+    "resistente": ["monitoraggio", "surroga", "feedback"]
+  },
+  "eventiFacilitatore": [
+    { "id": "ev1", "titolo": "Picco di mercato", "testo": "Un cliente strategico chiede una risposta immediata. La settimana in corso costa 2 ore manageriali in piu' di riserva bruciate automaticamente per il team che non ha almeno 2 ore libere.", "tipo": "penalitaOreLibere" },
+    { "id": "ev2", "titolo": "Riorganizzazione improvvisa", "testo": "Un collaboratore Potenziale a scelta del facilitatore riceve -10 motivazione questa settimana.", "tipo": "motivazioneCollaboratore", "delta": -10, "clusterTarget": "potenziale" },
+    { "id": "ev3", "titolo": "Turnover in un tavolo concorrente", "testo": "Solo narrativo: da leggere in aula per stimolare la competizione, nessun effetto sui punteggi.", "tipo": "narrativo" }
+  ],
+  "sogliaTurnoverRischioFinale": 60,
+  "penalitaSostenibilitaPerTurnoverAlto": 15
+}

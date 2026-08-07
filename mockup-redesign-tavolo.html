@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LESS IS MORE — Mockup redesign dashboard tavolo</title>
+<style>
+  :root {
+    --navy-950: #0b1220;
+    --navy-900: #101a30;
+    --navy-800: #16233f;
+    --navy-700: #1e2f50;
+    --navy-600: #2a3f66;
+    --gold-400: #d9b45c;
+    --gold-300: #e8ca87;
+    --text-primary: #eef1f6;
+    --text-muted: #9aa7bd;
+    --green-ok: #4caf7d;
+    --red-warn: #d9614f;
+    --amber-warn: #d9a24f;
+    --purple-info: #a98fd1;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--navy-950); color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    transition: background 0.6s ease;
+  }
+  body.modalita-crisi { background: #241a12; }
+  .hidden { display: none !important; }
+
+  .nota-progetto {
+    background: var(--navy-800); border-bottom: 1px solid var(--gold-400);
+    padding: 10px 20px; font-size: 0.78rem; color: var(--text-muted); text-align: center;
+  }
+  .nota-progetto strong { color: var(--gold-300); }
+
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    padding: 14px 24px; background: linear-gradient(180deg, var(--navy-900), var(--navy-950));
+    border-bottom: 1px solid var(--navy-700); position: sticky; top: 0; z-index: 30;
+  }
+  .brand-title { font-weight: 700; letter-spacing: 3px; color: var(--gold-400); font-size: 1rem; }
+  .nav-mockup { display: flex; gap: 6px; flex-wrap: wrap; }
+  .nav-mockup button {
+    background: var(--navy-800); border: 1px solid var(--navy-600); color: var(--text-muted);
+    padding: 8px 14px; border-radius: 20px; font-size: 0.78rem; cursor: pointer;
+  }
+  .nav-mockup button.attivo { background: var(--gold-400); color: var(--navy-950); border-color: var(--gold-400); font-weight: 600; }
+  .nav-mockup button:hover:not(.attivo) { border-color: var(--gold-400); color: var(--gold-300); }
+
+  main { max-width: 900px; margin: 0 auto; padding: 20px 16px 80px; }
+  .schermata-mock { display: none; }
+  .schermata-mock.attiva { display: block; }
+
+  /* ---------- Dashboard home ---------- */
+  .header-team {
+    text-align: center; padding: 18px 0 10px; border-bottom: 1px solid var(--navy-700); margin-bottom: 18px;
+  }
+  .header-team h1 { margin: 0; letter-spacing: 4px; font-size: 1.3rem; color: var(--gold-300); }
+
+  .griglia-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 18px; }
+  .kpi-card { background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: var(--radius); padding: 16px; }
+  .kpi-card .kpi-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .kpi-card .kpi-valore { font-size: 1.8rem; font-weight: 700; color: var(--gold-300); }
+  .barra-track { width: 100%; height: 10px; background: var(--navy-700); border-radius: 6px; overflow: hidden; margin-top: 6px; }
+  .barra-fill { height: 100%; background: var(--gold-400); border-radius: 6px; transition: width 0.4s ease; }
+  .barra-fill.verde { background: var(--green-ok); }
+  .barra-fill.rossa { background: var(--red-warn); }
+  .kpi-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+  .evoluzione-positiva { color: var(--green-ok); font-weight: 700; }
+  .evoluzione-negativa { color: var(--red-warn); font-weight: 700; }
+
+  .banner-attenzione {
+    background: #2f271a; border: 1px solid var(--amber-warn); border-radius: var(--radius);
+    padding: 12px 16px; margin-bottom: 18px; font-size: 0.9rem; color: var(--gold-300); text-align: center;
+  }
+
+  .griglia-card-collab { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .card-collab {
+    background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: var(--radius);
+    padding: 16px; position: relative;
+  }
+  .card-collab.ha-richiesta { border-color: var(--gold-400); }
+  .card-collab .nome-riga { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .card-collab h3 { margin: 0; font-size: 1rem; color: var(--text-primary); }
+  .stelle { color: var(--gold-400); font-size: 0.85rem; letter-spacing: 1px; }
+  .riga-stat { font-size: 0.75rem; color: var(--text-muted); margin: 8px 0 2px; display: flex; justify-content: space-between; }
+  .ultimo-evento { font-size: 0.75rem; color: var(--text-muted); font-style: italic; margin: 10px 0; min-height: 2.2em; }
+  .tag-richiesta {
+    display: inline-flex; align-items: center; gap: 4px; background: #2f2717; color: var(--gold-300);
+    border: 1px solid var(--gold-400); border-radius: 20px; padding: 4px 10px; font-size: 0.72rem; margin-bottom: 8px;
+  }
+  .btn-apri {
+    width: 100%; background: var(--navy-700); color: var(--text-primary); border: 1px solid var(--navy-600);
+    border-radius: 8px; padding: 8px; font-size: 0.82rem; cursor: pointer; margin-top: 4px;
+  }
+  .card-collab.ha-richiesta .btn-apri { background: var(--gold-400); color: var(--navy-950); font-weight: 600; border: none; }
+  .btn-apri:hover { opacity: 0.9; }
+
+  /* ---------- Overlay richiesta ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(6, 10, 20, 0.82); z-index: 40;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .overlay-box {
+    background: var(--navy-900); border: 1px solid var(--gold-400); border-radius: var(--radius);
+    max-width: 440px; width: 100%; padding: 26px; text-align: center;
+  }
+  .overlay-box h2 { margin: 0 0 4px; letter-spacing: 2px; color: var(--gold-300); }
+  .overlay-box .sottotitolo { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; }
+  .overlay-box .narrativa { font-size: 0.92rem; line-height: 1.6; margin-bottom: 18px; text-align: left; }
+  .opzioni-azione { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; text-align: left; }
+  .opzione-riga {
+    display: flex; align-items: center; gap: 10px; background: var(--navy-800); border: 1px solid var(--navy-600);
+    border-radius: 8px; padding: 10px 12px; cursor: pointer; font-size: 0.88rem;
+  }
+  .opzione-riga:hover { border-color: var(--gold-400); }
+  .opzione-riga input { accent-color: var(--gold-400); }
+  .tempo-richiesto { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; }
+  .tempo-richiesto strong { color: var(--gold-300); font-size: 1.1rem; }
+  .btn-conferma {
+    width: 100%; background: var(--gold-400); color: var(--navy-950); border: none; border-radius: 8px;
+    padding: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  }
+  .btn-conferma:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-chiudi-overlay {
+    background: none; border: none; color: var(--text-muted); font-size: 0.78rem; cursor: pointer;
+    margin-top: 10px; text-decoration: underline;
+  }
+
+  .esito-narrativo { font-size: 1rem; line-height: 1.7; padding: 10px 0; }
+  .esito-narrativo .nome-in-corsivo { color: var(--gold-300); font-weight: 600; }
+
+  /* ---------- Timeline ---------- */
+  .timeline-collab { max-width: 460px; margin: 0 auto; }
+  .timeline-item {
+    display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--navy-700);
+  }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-icona { font-size: 1rem; width: 22px; text-align: center; flex-shrink: 0; }
+  .timeline-icona.ok { color: var(--green-ok); }
+  .timeline-icona.warn { color: var(--amber-warn); }
+  .timeline-testo { font-size: 0.88rem; }
+  .timeline-round { font-size: 0.7rem; color: var(--text-muted); }
+
+  /* ---------- Crisi ---------- */
+  .banner-crisi-mock {
+    background: #3a1f1a; border: 1px solid var(--red-warn); border-radius: var(--radius);
+    padding: 16px 20px; margin-bottom: 18px; text-align: center;
+  }
+  .banner-crisi-mock h2 { margin: 0 0 6px; color: #f0a89a; letter-spacing: 2px; font-size: 1.1rem; }
+  .banner-crisi-mock p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
+
+  /* ---------- Fine round ---------- */
+  .riepilogo-round { max-width: 480px; margin: 0 auto; text-align: center; }
+  .riepilogo-round h2 { letter-spacing: 3px; color: var(--gold-300); }
+  .griglia-riepilogo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; text-align: left; }
+  .riepilogo-voce { background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: var(--radius); padding: 14px; }
+  .riepilogo-voce .etichetta { font-size: 0.72rem; color: var(--text-muted); }
+  .riepilogo-voce .valore { font-size: 1.4rem; font-weight: 700; color: var(--gold-300); margin-top: 4px; }
+  .btn-vedi-classifica {
+    background: var(--gold-400); color: var(--navy-950); border: none; border-radius: 8px;
+    padding: 12px 24px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  }
+  .classifica-reveal { margin-top: 20px; text-align: left; }
+  .classifica-reveal table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .classifica-reveal th, .classifica-reveal td { padding: 8px 10px; border-bottom: 1px solid var(--navy-700); text-align: left; }
+  .classifica-reveal th { color: var(--gold-300); }
+
+  /* ---------- Vista team (Fase 4) ---------- */
+  .intro-team-view { text-align: center; margin-bottom: 20px; }
+  .intro-team-view p { color: var(--text-muted); font-size: 0.88rem; max-width: 520px; margin: 6px auto 0; }
+  .griglia-sistemiche-mock { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .card-sistemica {
+    background: var(--navy-900); border: 1px solid var(--navy-700); border-radius: var(--radius);
+    padding: 16px; text-align: center; cursor: pointer;
+  }
+  .card-sistemica.attiva { border-color: var(--gold-400); background: var(--navy-800); }
+  .card-sistemica .icona-sistemica { font-size: 1.6rem; margin-bottom: 8px; }
+  .card-sistemica h4 { margin: 0 0 6px; font-size: 0.9rem; }
+  .card-sistemica p { margin: 0; font-size: 0.72rem; color: var(--text-muted); }
+
+  .nota-legenda { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 24px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+  <div class="nota-progetto">
+    Mockup statico non funzionante — dati finti, nessuna connessione al gioco reale. Serve solo per validare la direzione visiva prima di scrivere il codice.
+    <strong>Scrivania a 4 aree e avatar illustrati non inclusi: proposti come step 2, dopo il tuo ok su questo nucleo.</strong>
+  </div>
+
+  <header class="topbar">
+    <span class="brand-title">LESS IS MORE — MOCKUP</span>
+    <nav class="nav-mockup">
+      <button data-schermata="dashboard" class="attivo">Dashboard</button>
+      <button data-schermata="timeline">Timeline collaboratore</button>
+      <button data-schermata="crisi">Fase 3 — Crisi</button>
+      <button data-schermata="fineround">Fine round</button>
+      <button data-schermata="team">Vista Team (Fase 4)</button>
+    </nav>
+  </header>
+
+  <main id="app">
+
+    <!-- ================= DASHBOARD ================= -->
+    <section id="schermata-dashboard" class="schermata-mock attiva">
+      <div class="header-team">
+        <h1>TEAM ALFA</h1>
+      </div>
+
+      <div class="griglia-kpi">
+        <div class="kpi-card">
+          <div class="kpi-label">🏆 Performance rete</div>
+          <div class="kpi-valore" id="kpiPerformanza">74</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">⏱ Tempo disponibile</div>
+          <div class="barra-track"><div class="barra-fill" id="barraTempo" style="width:60%"></div></div>
+          <div class="kpi-sub"><span id="oreResidueMock">6</span>/10 ore rimaste</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">😊 Clima</div>
+          <div class="barra-track"><div class="barra-fill verde" style="width:78%"></div></div>
+          <div class="kpi-sub">78/100</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">📈 Evoluzione</div>
+          <div class="kpi-valore evoluzione-positiva" style="font-size:1.2rem;">▲ positiva</div>
+        </div>
+      </div>
+
+      <div class="banner-attenzione" id="bannerAttenzione">3 collaboratori richiedono attenzione</div>
+
+      <div class="griglia-card-collab" id="grigliaCardCollab"></div>
+    </section>
+
+    <!-- ================= TIMELINE ================= -->
+    <section id="schermata-timeline" class="schermata-mock">
+      <div class="header-team"><h1>Cronologia — Marco</h1></div>
+      <div class="timeline-collab" id="timelineMarco"></div>
+      <p class="nota-legenda">Ogni collaboratore avrebbe una cronologia così: il giocatore si ricorda cosa è successo, non solo il valore attuale delle statistiche.</p>
+    </section>
+
+    <!-- ================= CRISI ================= -->
+    <section id="schermata-crisi" class="schermata-mock">
+      <div class="banner-crisi-mock">
+        <h2>⚠ NUOVA NORMATIVA</h2>
+        <p>Un nuovo prodotto viene lanciato prima del previsto. Le ore disponibili sono diminuite e le richieste si moltiplicano.</p>
+      </div>
+      <p class="nota-legenda" style="margin-bottom:16px;">In Fase 3 tutta la dashboard cambia leggermente tonalità (sfondo più caldo) invece di un semplice popup: la crisi si "sente" anche visivamente, non solo nei numeri.</p>
+      <button class="btn-vedi-classifica" id="btnToggleCrisi" style="display:block;margin:0 auto;">Attiva/disattiva anteprima modalità crisi</button>
+    </section>
+
+    <!-- ================= FINE ROUND ================= -->
+    <section id="schermata-fineround" class="schermata-mock">
+      <div class="riepilogo-round">
+        <h2>ROUND 3</h2>
+        <div class="griglia-riepilogo">
+          <div class="riepilogo-voce"><div class="etichetta">Richieste ricevute</div><div class="valore">7</div></div>
+          <div class="riepilogo-voce"><div class="etichetta">Richieste gestite</div><div class="valore">5</div></div>
+          <div class="riepilogo-voce"><div class="etichetta">Ore utilizzate</div><div class="valore">8/8</div></div>
+          <div class="riepilogo-voce"><div class="etichetta">Autonomia rete</div><div class="valore evoluzione-positiva">▲</div></div>
+          <div class="riepilogo-voce"><div class="etichetta">Clima</div><div class="valore evoluzione-negativa">▼</div></div>
+        </div>
+        <button class="btn-vedi-classifica" id="btnVediClassifica">Vedi classifica</button>
+        <div class="classifica-reveal hidden" id="classificaReveal">
+          <table>
+            <thead><tr><th>#</th><th>Tavolo</th><th>Punteggio</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Team Alfa</td><td>68.4</td></tr>
+              <tr><td>2</td><td>Team Beta</td><td>61.2</td></tr>
+              <tr><td>3</td><td>Team Gamma</td><td>55.9</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="nota-legenda">Il riepilogo di round racconta cosa è successo prima di mostrare la classifica, invece di saltare subito al confronto tra tavoli.</p>
+    </section>
+
+    <!-- ================= VISTA TEAM (FASE 4) ================= -->
+    <section id="schermata-team" class="schermata-mock">
+      <div class="intro-team-view">
+        <h1 style="letter-spacing:3px;color:var(--gold-300);margin:0;">TEAM</h1>
+        <p>In Fase 4 la vista cambia scala: non vedi più le singole persone, vedi la rete. È un cambio di prospettiva dal micro (i singoli collaboratori) al macro (il sistema che li tiene insieme).</p>
+      </div>
+      <div class="griglia-sistemiche-mock" id="grigliaSistemicheMock"></div>
+    </section>
+
+  </main>
+
+  <!-- Overlay richiesta (notifica) -->
+  <div class="overlay hidden" id="overlayRichiesta">
+    <div class="overlay-box" id="overlayBoxContenuto"></div>
+  </div>
+
+<script>
+  const collaboratoriMock = [
+    {
+      id: 'marco', nome: 'Marco', stelle: 4, motivazione: 70, autonomia: 78,
+      ultimoEvento: 'Ha concluso una vendita importante.',
+      richiesta: { testo: "Vorrebbe un affiancamento prima dell'incontro con un nuovo cliente.", ore: 2,
+        narrativa: 'Marco ha appena acquisito un nuovo cliente importante. È motivato ma non ha mai gestito un cliente di queste dimensioni.' }
+    },
+    {
+      id: 'giulia', nome: 'Giulia', stelle: 5, motivazione: 60, autonomia: 85,
+      ultimoEvento: 'Ha proposto un\'idea in riunione.',
+      richiesta: null
+    },
+    {
+      id: 'sara', nome: 'Sara', stelle: 3, motivazione: 88, autonomia: 35,
+      ultimoEvento: 'Sta preparando la certificazione.',
+      richiesta: { testo: 'Chiede un feedback sull\'ultimo lavoro consegnato.', ore: 2,
+        narrativa: 'Sara ha consegnato il suo primo lavoro autonomo. È molto motivata ma insicura sulla qualità del risultato.' }
+    },
+    {
+      id: 'luca', nome: 'Luca', stelle: 3, motivazione: 80, autonomia: 40,
+      ultimoEvento: 'Ha chiesto di essere affiancato la scorsa settimana.',
+      richiesta: null
+    },
+    {
+      id: 'paolo', nome: 'Paolo', stelle: 2, motivazione: 35, autonomia: 55,
+      ultimoEvento: 'Si è lamentato del carico di lavoro.',
+      richiesta: { testo: 'Ha perso un cliente e vuole confrontarsi.', ore: 3,
+        narrativa: 'Paolo ha perso un cliente storico questa settimana. È scoraggiato e fatica a vedere una via d\'uscita.' }
+    },
+    {
+      id: 'elena', nome: 'Elena', stelle: 2, motivazione: 30, autonomia: 50,
+      ultimoEvento: 'Nessun contatto nelle ultime due settimane.',
+      richiesta: null
+    }
+  ];
+
+  const azioniMock = [
+    { id: 'coaching', label: 'Coaching', ore: 3 },
+    { id: 'shadowing', label: 'Shadowing', ore: 4 },
+    { id: 'call', label: 'Call rapida', ore: 1 },
+    { id: 'delega', label: 'Delega', ore: 1 },
+    { id: 'nessun', label: 'Nessun intervento', ore: 0 }
+  ];
+
+  const esitiPositivi = [
+    (nome) => `${nome} sorride. "Grazie, era proprio il confronto che mi serviva."`,
+    (nome) => `${nome} annuisce, più sicuro di prima. Il prossimo passo lo farà da solo.`,
+    (nome) => `${nome} ringrazia e torna al lavoro con un'energia diversa.`
+  ];
+  const esitiNeutri = [
+    (nome) => `${nome} conclude l'incontro. Hai la sensazione che avrebbe potuto farcela anche da solo.`,
+    (nome) => `${nome} accetta l'aiuto, ma qualcosa ti dice che stavolta non era davvero necessario.`
+  ];
+
+  let oreResidueStato = 6;
+
+  function renderStelle(n) {
+    return '★'.repeat(n) + '☆'.repeat(5 - n);
+  }
+
+  function renderDashboard() {
+    const griglia = document.getElementById('grigliaCardCollab');
+    griglia.innerHTML = '';
+    let conRichiesta = 0;
+    collaboratoriMock.forEach((c) => {
+      if (c.richiesta) conRichiesta += 1;
+      const card = document.createElement('div');
+      card.className = 'card-collab' + (c.richiesta ? ' ha-richiesta' : '');
+      card.innerHTML = `
+        <div class="nome-riga"><h3>👤 ${c.nome}</h3><span class="stelle">${renderStelle(c.stelle)}</span></div>
+        <div class="riga-stat"><span>😊 Motivazione</span><span>${c.motivazione}</span></div>
+        <div class="barra-track"><div class="barra-fill ${c.motivazione < 45 ? 'rossa' : 'verde'}" style="width:${c.motivazione}%"></div></div>
+        <div class="riga-stat"><span>⚡ Autonomia</span><span>${c.autonomia}</span></div>
+        <div class="barra-track"><div class="barra-fill" style="width:${c.autonomia}%"></div></div>
+        <div class="ultimo-evento">🟢 "${c.ultimoEvento}"</div>
+        ${c.richiesta ? `<div class="tag-richiesta">⚠ Chiede aiuto</div>` : ''}
+        <button class="btn-apri" data-id="${c.id}">${c.richiesta ? 'Apri richiesta' : 'Apri scheda'}</button>
+      `;
+      griglia.appendChild(card);
+    });
+    document.getElementById('bannerAttenzione').textContent = conRichiesta > 0
+      ? `${conRichiesta} collaboratori richiedono attenzione`
+      : 'Nessuna richiesta attiva questo round: tutto tranquillo.';
+    document.getElementById('bannerAttenzione').classList.toggle('hidden', conRichiesta === 0);
+
+    griglia.querySelectorAll('.btn-apri').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const c = collaboratoriMock.find((x) => x.id === btn.dataset.id);
+        if (c.richiesta) apriRichiesta(c);
+        else apriSchedaSenzaRichiesta(c);
+      });
+    });
+  }
+
+  function apriSchedaSenzaRichiesta(c) {
+    const overlay = document.getElementById('overlayRichiesta');
+    const box = document.getElementById('overlayBoxContenuto');
+    box.innerHTML = `
+      <h2>${c.nome.toUpperCase()}</h2>
+      <div class="sottotitolo">Nessuna richiesta attiva questo round</div>
+      <div class="narrativa">${c.ultimoEvento}</div>
+      <p class="muted" style="color:var(--text-muted);font-size:0.82rem;">Potresti comunque decidere di investire del tempo su ${c.nome} in modo proattivo, anche se non ha chiesto nulla.</p>
+      <button class="btn-chiudi-overlay" id="btnChiudiOverlay">Chiudi</button>
+    `;
+    overlay.classList.remove('hidden');
+    document.getElementById('btnChiudiOverlay').addEventListener('click', () => overlay.classList.add('hidden'));
+  }
+
+  function apriRichiesta(c) {
+    const overlay = document.getElementById('overlayRichiesta');
+    const box = document.getElementById('overlayBoxContenuto');
+    box.innerHTML = `
+      <h2>${c.nome.toUpperCase()}</h2>
+      <div class="sottotitolo">🔔 ${c.richiesta.testo}</div>
+      <div class="narrativa">${c.richiesta.narrativa}</div>
+      <div style="font-size:0.85rem;color:var(--gold-300);margin-bottom:10px;">Cosa fai?</div>
+      <div class="opzioni-azione" id="opzioniAzione">
+        ${azioniMock.map((a) => `
+          <label class="opzione-riga">
+            <input type="radio" name="azioneMock" value="${a.id}" data-ore="${a.ore}" />
+            <span>${a.label}</span>
+            <span style="margin-left:auto;color:var(--text-muted);font-size:0.75rem;">${a.ore}h</span>
+          </label>
+        `).join('')}
+      </div>
+      <div class="tempo-richiesto">Tempo richiesto: <strong id="oreSelezionate">—</strong></div>
+      <button class="btn-conferma" id="btnConfermaAzione" disabled>Conferma</button>
+      <button class="btn-chiudi-overlay" id="btnChiudiOverlay">Annulla</button>
+    `;
+    overlay.classList.remove('hidden');
+
+    const radios = box.querySelectorAll('input[name="azioneMock"]');
+    const btnConferma = document.getElementById('btnConfermaAzione');
+    radios.forEach((r) => r.addEventListener('change', () => {
+      document.getElementById('oreSelezionate').textContent = r.dataset.ore + 'h';
+      btnConferma.disabled = false;
+    }));
+
+    document.getElementById('btnChiudiOverlay').addEventListener('click', () => overlay.classList.add('hidden'));
+    btnConferma.addEventListener('click', () => {
+      const scelto = box.querySelector('input[name="azioneMock"]:checked');
+      const ore = scelto ? parseInt(scelto.dataset.ore, 10) : 0;
+      mostraEsito(c, ore);
+    });
+  }
+
+  function mostraEsito(c, ore) {
+    const box = document.getElementById('overlayBoxContenuto');
+    const positivo = c.motivazione >= 50;
+    const frase = positivo
+      ? esitiPositivi[Math.floor(Math.random() * esitiPositivi.length)](c.nome)
+      : esitiNeutri[Math.floor(Math.random() * esitiNeutri.length)](c.nome);
+    box.innerHTML = `
+      <h2>${c.nome.toUpperCase()}</h2>
+      <div class="esito-narrativo">${frase}</div>
+      <button class="btn-conferma" id="btnTornaDashboard">Torna alla dashboard</button>
+    `;
+    document.getElementById('btnTornaDashboard').addEventListener('click', () => {
+      document.getElementById('overlayRichiesta').classList.add('hidden');
+      oreResidueStato = Math.max(0, oreResidueStato - ore);
+      document.getElementById('oreResidueMock').textContent = oreResidueStato;
+      document.getElementById('barraTempo').style.width = (oreResidueStato / 10 * 100) + '%';
+      c.richiesta = null;
+      c.ultimoEvento = frase;
+      renderDashboard();
+    });
+  }
+
+  function renderTimeline() {
+    const eventi = [
+      { icona: '✔', tipo: 'ok', testo: 'Certificazione completata', round: 'Round 1' },
+      { icona: '✔', tipo: 'ok', testo: 'Ha acquisito un nuovo cliente', round: 'Round 3' },
+      { icona: '✔', tipo: 'ok', testo: 'Coaching ricevuto prima del colloquio', round: 'Round 3' },
+      { icona: '⚠', tipo: 'warn', testo: 'Autonomia in leggero calo', round: 'Round 5' },
+      { icona: '✔', tipo: 'ok', testo: 'Buddy attivato dal team', round: 'Round 7' }
+    ];
+    const box = document.getElementById('timelineMarco');
+    box.innerHTML = eventi.map((e) => `
+      <div class="timeline-item">
+        <div class="timeline-icona ${e.tipo}">${e.icona}</div>
+        <div>
+          <div class="timeline-testo">${e.testo}</div>
+          <div class="timeline-round">${e.round}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderVistaTeam() {
+    const azioniSistemicheMock = [
+      { id: 'buddy', icona: '🤝', label: 'Buddy', desc: 'Coppie di supporto reciproco' },
+      { id: 'mentoring', icona: '🧭', label: 'Mentoring', desc: 'Un senior guida un junior nel tempo' },
+      { id: 'checklist', icona: '📋', label: 'Checklist', desc: 'Procedure standard per i casi comuni' },
+      { id: 'community', icona: '💬', label: 'Community', desc: 'Spazio di confronto tra pari' },
+      { id: 'deleghe', icona: '🗂', label: 'Deleghe strutturali', desc: 'Responsabilità stabili, non solo per il round' }
+    ];
+    const griglia = document.getElementById('grigliaSistemicheMock');
+    griglia.innerHTML = azioniSistemicheMock.map((a) => `
+      <div class="card-sistemica" data-id="${a.id}">
+        <div class="icona-sistemica">${a.icona}</div>
+        <h4>${a.label}</h4>
+        <p>${a.desc}</p>
+      </div>
+    `).join('');
+    griglia.querySelectorAll('.card-sistemica').forEach((card) => {
+      card.addEventListener('click', () => card.classList.toggle('attiva'));
+    });
+  }
+
+  // ---------- Navigazione tra schermate mockup ----------
+  document.querySelectorAll('.nav-mockup button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.nav-mockup button').forEach((b) => b.classList.remove('attivo'));
+      btn.classList.add('attivo');
+      document.querySelectorAll('.schermata-mock').forEach((s) => s.classList.remove('attiva'));
+      document.getElementById('schermata-' + btn.dataset.schermata).classList.add('attiva');
+    });
+  });
+
+  document.getElementById('btnToggleCrisi').addEventListener('click', () => {
+    document.body.classList.toggle('modalita-crisi');
+  });
+
+  document.getElementById('btnVediClassifica').addEventListener('click', () => {
+    document.getElementById('classificaReveal').classList.remove('hidden');
+  });
+
+  renderDashboard();
+  renderTimeline();
+  renderVistaTeam();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+{
+  "_note": "Ogni profilo e' un vettore-segnatura su metriche normalizzate 0-1 calcolate dal motore su tutta la sessione. Il team viene assegnato al profilo con distanza euclidea pesata minima. metricheOrdine definisce l'ordine dei valori nei vettori. quotaDelega (scelta attiva di responsabilizzazione) e quotaNessunIntervento (assenza di azione) sono tenute separate: confonderle appiattiva profili molto diversi tra loro.",
+  "metricheOrdine": [
+    "focusPotenziale",
+    "focusPerformer",
+    "focusResistente",
+    "quotaDelega",
+    "quotaNessunIntervento",
+    "quotaSurroga",
+    "concentrazioneOre",
+    "coerenzaSituazionale",
+    "reattivita",
+    "quotaShadowingSuPerformer",
+    "quotaOreUsateSulDisponibile"
+  ],
+  "pesiMetriche": [1.1, 0.8, 0.9, 1.0, 1.0, 1.0, 1.0, 1.3, 1.0, 1.0, 0.7],
+  "profili": {
+    "coltivatore": {
+      "label": "Il Coltivatore",
+      "vettore": [0.85, 0.30, 0.20, 0.35, 0.10, 0.10, 0.45, 0.80, 0.35, 0.15, 0.60],
+      "descrizione": "Investe il tempo dove il ritorno di sviluppo e' piu' alto: sui collaboratori a potenziale. Costruisce crescita, a volte a scapito dell'attenzione immediata ai performer."
+    },
+    "stratega": {
+      "label": "Lo Stratega",
+      "vettore": [0.55, 0.30, 0.25, 0.40, 0.15, 0.15, 0.35, 0.95, 0.45, 0.10, 0.55],
+      "descrizione": "Adatta lo stile al collaboratore e alla situazione. Alloca il tempo dove serve, non dove e' comodo. Il profilo piu' vicino all'intento del framework di leadership situazionale."
+    },
+    "controllore": {
+      "label": "Il Controllore",
+      "vettore": [0.20, 0.55, 0.25, 0.05, 0.05, 0.15, 0.60, 0.25, 0.30, 0.80, 0.85],
+      "descrizione": "Tiene sotto controllo anche chi non ne ha bisogno. Alto uso di monitoraggio e shadowing sui performer, bassa delega: rischia di generare dipendenza proprio dove l'autonomia era gia' un asset."
+    },
+    "salvatore": {
+      "label": "Il Salvatore",
+      "vettore": [0.20, 0.15, 0.80, 0.05, 0.15, 0.55, 0.60, 0.25, 0.30, 0.10, 0.80],
+      "descrizione": "Concentra energie sui collaboratori piu' in difficolta', spesso con surroga o coaching ripetuto, a fronte di un ritorno limitato. Il tempo speso non si traduce in crescita della rete."
+    },
+    "pompiere": {
+      "label": "Il Pompiere",
+      "vettore": [0.33, 0.40, 0.29, 0.05, 0.55, 0.35, 0.05, 0.30, 0.60, 0.25, 0.70],
+      "descrizione": "Decide in base all'urgenza del momento piu' che a una linea strategica. L'allocazione del tempo cambia molto da una settimana all'altra, spesso inseguendo l'ultima emergenza: gran parte della rete resta senza alcun intervento mentre lui insegue i due o tre casi piu' urgenti."
+    },
+    "accentratore": {
+      "label": "L'Accentratore",
+      "vettore": [0.32, 0.36, 0.32, 0.02, 0.15, 0.05, 0.05, 0.30, 0.15, 0.05, 0.97],
+      "descrizione": "Vuole intervenire ovunque, sempre. Usa quasi tutte le ore disponibili ogni settimana, delega pochissimo: la rete fatica a sviluppare autonomia perche' il manager non lascia spazio."
+    }
+  }
+}

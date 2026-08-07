@@ -1,0 +1,48 @@
+{
+  "_note": "Azioni disponibili solo in Fase 4. Non hanno un singolo collaboratore target: agiscono sull'intera rete. L'effetto principale e' ridurre in modo persistente la propensione a chiedere aiuto di tutta la squadra (il cuore dell'indicatore 'richieste al manager'), con un piccolo effetto immediato su autonomia/motivazione media.",
+  "azioniSistemiche": {
+    "buddy": {
+      "label": "Creare un sistema di buddy",
+      "costoOre": 3,
+      "descrizione": "Abbini i collaboratori a coppie per farsi supporto reciproco invece di rivolgersi sempre a te.",
+      "effettoPropensioneRichiesta": -8,
+      "effettoAutonomiaMedia": 2
+    },
+    "mentoringSenior": {
+      "label": "Far affiancare un senior",
+      "costoOre": 3,
+      "descrizione": "Un collaboratore esperto diventa punto di riferimento per chi ha piu' bisogno di supporto.",
+      "effettoPropensioneRichiesta": -10,
+      "effettoAutonomiaMedia": 3
+    },
+    "community": {
+      "label": "Creare una community di pratica",
+      "costoOre": 4,
+      "descrizione": "Uno spazio ricorrente in cui la squadra si confronta e si aiuta senza passare per te.",
+      "effettoPropensioneRichiesta": -6,
+      "effettoAutonomiaMedia": 2
+    },
+    "riunioneCondivisione": {
+      "label": "Organizzare una riunione di condivisione",
+      "costoOre": 2,
+      "descrizione": "Un momento collettivo per allineare esperienze e soluzioni gia' trovate da altri.",
+      "effettoPropensioneRichiesta": -5,
+      "effettoAutonomiaMedia": 1
+    },
+    "checklist": {
+      "label": "Creare una checklist condivisa",
+      "costoOre": 2,
+      "descrizione": "Standardizzi una buona pratica cosi' chi ha un dubbio ricorrente puo' risolverlo da solo.",
+      "effettoPropensioneRichiesta": -7,
+      "effettoAutonomiaMedia": 2
+    },
+    "peerCoaching": {
+      "label": "Far fare peer coaching",
+      "costoOre": 3,
+      "descrizione": "Due collaboratori si allenano a vicenda su un tema specifico, senza il tuo intervento diretto.",
+      "effettoPropensioneRichiesta": -9,
+      "effettoAutonomiaMedia": 2
+    }
+  },
+  "limitePropensioneMinima": 5
+}
