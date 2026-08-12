@@ -21,7 +21,7 @@
   padding: 14px;
   text-align: center;
 }
-.link-tavolo-card h4 { margin: 0 0 8px; color: var(--gold-300); }
+.link-tavolo-card h4 { margin: 0 0 8px; color: var(--gold-300); font-size: 1.4rem; }
 .link-tavolo-card img { width: 100%; max-width: 180px; border-radius: 6px; background: white; padding: 6px; }
 .link-tavolo-card .codice { font-size: 1.4rem; letter-spacing: 3px; font-weight: 700; color: var(--gold-400); margin: 8px 0; }
 .link-tavolo-card .url-box {
@@ -94,8 +94,25 @@
 .banner-pausa { border: 1px solid var(--gold-400); background: #3a331a; }
 .banner-pausa h3 { color: var(--gold-300); margin: 0 0 6px; }
 
-.timer-round { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
-.timer-round.scaduto #timerRoundValore { color: var(--red-warn); font-weight: 700; }
+.timer-round {
+  font-size: 1.6rem; font-weight: 700; color: var(--gold-300); margin-top: 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.timer-round #timerRoundValore { font-size: 2rem; letter-spacing: 1px; }
+.timer-round .btn-link { font-size: 0.75rem; }
+.timer-round.scaduto #timerRoundValore { color: var(--red-warn); animation: timer-pulsa 1s infinite; }
+
+@keyframes timer-pulsa {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.riga-azioni-fase1 { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+#inputNumeroTavoli, #inputNumeroRound, #inputNumeroRoundFase4, #inputOrePerRound {
+  max-width: 90px;
+  align-self: flex-start;
+}
 
 .durata-round-box {
   display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 0.8rem; color: var(--text-muted);

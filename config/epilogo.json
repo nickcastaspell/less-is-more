@@ -1,6 +1,6 @@
 {
   "_note": "Epilogo narrativo di fine sessione ('una settimana senza di voi'): valutato una volta a tavolo dopo l'ultimo round, in ordine di priorita' (il primo scenario le cui condizioni sono soddisfatte vince). Le condizioni usano le metriche dell'ultimo round giocato (punteggiPerRound) e il conteggio dei collaboratori usciti dalla rete.",
-  "titoloSezione": "Una settimana senza di voi",
+  "titoloSezione": "Una settimana senza di te",
   "scenari": [
     {
       "id": "rete_in_crisi",

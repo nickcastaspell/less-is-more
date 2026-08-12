@@ -57,6 +57,24 @@ function mostraSchermata(nome) {
   el(nome).classList.remove('hidden');
 }
 
+// ---------- Toast: notifiche non bloccanti al posto di alert() ----------
+function mostraToast(messaggio, tipo = 'info') {
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${tipo}`;
+  toast.textContent = messaggio;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('toast-uscita');
+    setTimeout(() => toast.remove(), 250);
+  }, 4000);
+}
+
 async function caricaConfigPubblico() {
   const res = await fetch('/config/pubblico');
   const config = await res.json();
@@ -105,7 +123,7 @@ async function entraInGioco(sessionId, tavoloId, token) {
     renderStato(vista);
   });
   state.socket.on('tavolo:erroreAzione', (e) => {
-    alert(e.messaggio + (e.oreResidue !== undefined ? ` (ore residue: ${e.oreResidue})` : ''));
+    mostraToast(e.messaggio + (e.oreResidue !== undefined ? ` (ore residue: ${e.oreResidue})` : ''), 'errore');
   });
   state.socket.on('evento:ricevuto', (evento) => {
     mostraBannerFluttuante(`${evento.titolo}: ${evento.testo}`);
@@ -188,11 +206,11 @@ function renderFase1Team(vista) {
   const template = el('templateClassificazione');
   griglia.innerHTML = '';
 
+  // In Fase 1 la scheda mostra solo nome e cognome: niente barre/stelle, che compaiono
+  // solo a partire dalla Settimana 1 (Fase 2), quando c'e' gia' una storia da mostrare.
   vista.collaboratori.forEach((c) => {
     const nodo = template.content.cloneNode(true);
     nodo.querySelector('.nome-collaboratore').textContent = c.nome;
-    nodo.querySelector('.stelle-overall').textContent = renderStelle(c.stelle);
-    renderBarreStat(nodo.querySelector('.barre-stat-collaboratore'), c);
 
     const select = nodo.querySelector('.select-categoria');
     popolaSelectCategoria(select, c.categoriaAssegnata);
@@ -212,7 +230,7 @@ function popolaSelectCategoria(select, valoreSelezionato) {
   select.innerHTML = '';
   const optDefault = document.createElement('option');
   optDefault.value = '';
-  optDefault.textContent = '— classifica —';
+  optDefault.textContent = '— categorizza —';
   select.appendChild(optDefault);
   state.categorieClassificazione.forEach((categoria) => {
     const opt = document.createElement('option');
@@ -407,7 +425,7 @@ function apriCronologia(c, vista) {
   const cronologia = (c.cronologia || []).slice().reverse();
 
   const timelineHtml = cronologia.length
-    ? `<div class="timeline-mini">${cronologia.map((voce) => `
+    ? `<h3 class="titolo-azioni-passate">Azioni passate</h3><div class="timeline-mini">${cronologia.map((voce) => `
         <div class="timeline-mini-item">
           <span class="ic">${voce.gestita ? '✓' : '•'}</span>
           <span>
@@ -598,6 +616,12 @@ function renderCollaboratori(vista) {
     azioneLabel.textContent = azioneAssegnata
       ? `Azione scelta: ${state.azioni[azioneAssegnata].label} (${state.azioni[azioneAssegnata].costoOre}h)`
       : 'Nessuna azione ancora scelta';
+    azioneLabel.classList.toggle('scelta', !!azioneAssegnata);
+
+    // Spunta "gia' agito questa settimana", cosi' non si perde tempo a riaprire schede gia' gestite
+    // (rispecchia la stessa spunta gia' presente nella zona Telefono).
+    const badgeGiaAgito = nodo.querySelector('.gia-agito-badge');
+    if (badgeGiaAgito) badgeGiaAgito.classList.toggle('hidden', !azioneAssegnata);
 
     if (c.uscitoDallaRete) {
       selectCategoria.disabled = true;

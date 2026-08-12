@@ -57,12 +57,19 @@
 }
 .barra-track { width: 100%; height: 8px; background: var(--navy-700); border-radius: 6px; overflow: hidden; }
 .barra-fill { height: 100%; background: var(--gold-400); border-radius: 6px; transition: width 0.4s ease; }
-.freccia-trend { font-size: 0.78rem; margin-left: 6px; font-weight: 700; }
+.freccia-trend { font-size: 1.1rem; margin-left: 6px; font-weight: 900; }
 .freccia-trend.su { color: var(--green-ok); }
 .freccia-trend.giu { color: var(--red-warn); }
 .freccia-trend.stabile { color: var(--text-muted); }
 
 .azione-corrente { font-size: 0.75rem; margin-bottom: 6px; min-height: 1em; }
+.azione-corrente.scelta { color: var(--gold-400); font-weight: 700; }
+
+.gia-agito-badge {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--green-ok); color: #06170f; font-size: 0.75rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+}
 .intro-zona-team { font-size: 0.85rem; color: var(--text-muted); margin: -4px 0 14px; }
 
 .conferma-box { text-align: center; }
@@ -107,8 +114,16 @@
 .azione-sistemica-toggle .costo { color: var(--text-muted); font-size: 0.7rem; }
 .azione-sistemica-toggle.selezionata { border-color: var(--gold-400); background: var(--navy-700); }
 
-.timer-round { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
-.timer-round.scaduto #timerRoundTeamValore { color: var(--red-warn); font-weight: 700; }
+.timer-round {
+  font-size: 1.5rem; font-weight: 700; color: var(--gold-300); margin-top: 6px;
+}
+.timer-round #timerRoundTeamValore { font-size: 1.8rem; letter-spacing: 1px; }
+.timer-round.scaduto #timerRoundTeamValore { color: var(--red-warn); animation: timer-pulsa 1s infinite; }
+
+@keyframes timer-pulsa {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
 
 .banner-lock { border: 1px solid var(--gold-400); background: #3a331a; text-align: center; }
 .banner-lock .btn { margin-top: 8px; }
@@ -200,10 +215,11 @@
 .btn-chiudi-overlay { background: none; border: none; color: var(--text-muted); font-size: 0.76rem; cursor: pointer; margin-top: 8px; text-decoration: underline; }
 
 /* ---------- Overlay Cronologia (scheda collaboratore cliccabile) ---------- */
-.timeline-mini { margin: 12px 0; padding-top: 10px; border-top: 1px dashed var(--navy-700); text-align: left; max-height: 34vh; overflow-y: auto; }
-.timeline-mini-item { display: flex; gap: 8px; font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; }
+.titolo-azioni-passate { margin: 12px 0 0; color: var(--gold-300); font-size: 0.95rem; }
+.timeline-mini { margin: 8px 0 12px; padding-top: 10px; border-top: 1px dashed var(--navy-700); text-align: left; max-height: 34vh; overflow-y: auto; }
+.timeline-mini-item { display: flex; gap: 8px; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 10px; line-height: 1.4; }
 .timeline-mini-item .ic { flex-shrink: 0; }
-.timeline-mini-item .rnd { opacity: 0.7; font-size: 0.72rem; }
+.timeline-mini-item .rnd { opacity: 0.8; font-size: 0.8rem; color: var(--gold-300); }
 .cronologia-vuota { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 10px; }
 .separatore-cronologia { border: none; border-top: 1px dashed var(--navy-700); margin: 14px 0; }
 
