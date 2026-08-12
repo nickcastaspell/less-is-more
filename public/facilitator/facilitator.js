@@ -116,6 +116,24 @@ function mostraSchermata(nomeSchermata) {
   el(nomeSchermata).classList.remove('hidden');
 }
 
+// ---------- Toast: notifiche non bloccanti al posto di alert() ----------
+function mostraToast(messaggio, tipo = 'info') {
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${tipo}`;
+  toast.textContent = messaggio;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('toast-uscita');
+    setTimeout(() => toast.remove(), 250);
+  }, 4000);
+}
+
 // ---------- Creazione sessione ----------
 
 el('btnCreaSessione').addEventListener('click', async () => {
@@ -132,7 +150,7 @@ el('btnCreaSessione').addEventListener('click', async () => {
     body: JSON.stringify({ nome, numeroTavoli, nomiTavoli, numeroRoundFase2, numeroRoundFase4, oreManagerialiPerRound })
   });
   if (!res.ok) {
-    alert('Errore nella creazione della sessione');
+    mostraToast('Errore nella creazione della sessione', 'errore');
     return;
   }
   const sessione = await res.json();
@@ -146,7 +164,7 @@ el('btnResume').addEventListener('click', () => {
   const tokenInserito = el('inputResumeToken').value.trim();
   const token = tokenInserito || leggiTokenLocale(id);
   if (!token) {
-    alert('Serve il token facilitatore di questa sessione (ricevuto alla creazione) per riprenderla.');
+    mostraToast('Serve il token facilitatore di questa sessione (ricevuto alla creazione) per riprenderla.', 'errore');
     return;
   }
   salvaTokenLocale(id, token);
@@ -177,6 +195,33 @@ async function caricaListaSessioni() {
         avviaSessione(s.id, token);
       });
       div.appendChild(btn);
+
+      const btnElimina = document.createElement('button');
+      btnElimina.className = 'btn btn-attenzione';
+      btnElimina.textContent = 'Elimina';
+      btnElimina.style.padding = '4px 10px';
+      btnElimina.style.marginLeft = '6px';
+      btnElimina.addEventListener('click', async () => {
+        if (!confirm(`Eliminare definitivamente la sessione "${s.nome}"? L'operazione non e' reversibile.`)) return;
+        let token = leggiTokenLocale(s.id);
+        if (!token) {
+          token = prompt(`Token facilitatore per "${s.nome}" (necessario per eliminarla):`);
+          if (!token) return;
+        }
+        try {
+          const r = await fetch(`/api/sessioni/${s.id}?tok=${encodeURIComponent(token)}`, { method: 'DELETE' });
+          if (!r.ok) {
+            mostraToast('Impossibile eliminare la sessione (token non valido?).', 'errore');
+            return;
+          }
+          div.remove();
+          mostraToast('Sessione eliminata.', 'successo');
+        } catch (err) {
+          mostraToast('Errore di rete durante l\'eliminazione.', 'errore');
+        }
+      });
+      div.appendChild(btnElimina);
+
       box.appendChild(div);
     });
   } catch (err) { /* silenzioso: nessuna sessione precedente raggiungibile */ }
@@ -189,7 +234,7 @@ async function avviaSessione(sessionId, token) {
   state.sessionId = sessionId;
   state.token = token || leggiTokenLocale(sessionId);
   if (!state.token) {
-    alert('Serve il token facilitatore per aprire questa sessione.');
+    mostraToast('Serve il token facilitatore per aprire questa sessione.', 'errore');
     return;
   }
 
@@ -202,12 +247,18 @@ async function avviaSessione(sessionId, token) {
   popolaSelectEventi();
 
   state.socket = io();
-  state.socket.emit('facilitatore:join', { sessionId, tok: state.token });
+  // Il "join" va rifatto ad OGNI evento connect, non solo alla prima connessione: se la rete
+  // cade anche per un attimo (wifi instabile, laptop sospeso, tab in background), socket.io
+  // riconnette da solo ma il server perde l'identita' legata al vecchio socket. Senza questo,
+  // i pulsanti della regia smettono di rispondere in silenzio finche' non si ricarica la pagina.
+  state.socket.on('connect', () => {
+    state.socket.emit('facilitatore:join', { sessionId, tok: state.token });
+  });
   state.socket.on('facilitatore:stato', (statoSessione) => {
     state.ultimoStato = statoSessione;
     renderStato(statoSessione);
   });
-  state.socket.on('errore', (e) => alert(e.messaggio));
+  state.socket.on('errore', (e) => mostraToast(e.messaggio, 'errore'));
 
   el('statoSessioneBadge').classList.remove('hidden');
 
@@ -217,7 +268,7 @@ async function avviaSessione(sessionId, token) {
 async function mostraLinkTavoli(sessionId) {
   const res = await fetch(`/api/sessioni/${sessionId}?tok=${encodeURIComponent(state.token)}`);
   if (!res.ok) {
-    alert('Token facilitatore non valido per questa sessione.');
+    mostraToast('Token facilitatore non valido per questa sessione.', 'errore');
     return;
   }
   const sessione = await res.json();
@@ -254,6 +305,7 @@ el('btnVaiRegia').addEventListener('click', () => {
   else mostraSchermata('schermataFase1');
 });
 el('btnMostraLink').addEventListener('click', () => mostraSchermata('schermataSalaAttesa'));
+el('btnMostraLinkFase1').addEventListener('click', () => mostraSchermata('schermataSalaAttesa'));
 el('btnTerminaFase1').addEventListener('click', () => {
   state.socket.emit('facilitatore:terminaFase1', { sessionId: state.sessionId });
 });
@@ -338,7 +390,8 @@ el('btnMostraBackup').addEventListener('click', () => {
 
 el('btnSalvaBackup').addEventListener('click', async () => {
   const res = await fetch(`/api/sessioni/${state.sessionId}/backup?tok=${encodeURIComponent(state.token)}`, { method: 'POST' });
-  if (!res.ok) return alert('Errore nel salvataggio del checkpoint.');
+  if (!res.ok) return mostraToast('Errore nel salvataggio del checkpoint.', 'errore');
+  mostraToast('Checkpoint salvato.', 'successo');
   await caricaListaBackup();
 });
 
@@ -367,7 +420,8 @@ async function caricaListaBackup() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ backupId: b.backupId })
       });
-      if (!r.ok) return alert('Errore nel ripristino del checkpoint.');
+      if (!r.ok) return mostraToast('Errore nel ripristino del checkpoint.', 'errore');
+      mostraToast('Checkpoint ripristinato.', 'successo');
       el('pannelloBackup').classList.add('hidden');
     });
     div.appendChild(btn);

@@ -47,7 +47,11 @@ function creaCollaboratoriPerTavolo(templateSquadra, collaboratoriConfig) {
     // --- Fase 1-4 ---
     categoriaAssegnata: null, // etichetta scelta dal tavolo in Fase 1 (es. "Investirei"), non il cluster reale
     categoriaStorico: [], // [{ round, categoria }]
-    propensioneRichiesta: (collaboratoriConfig.clusterDefinitions[c.cluster] || {}).propensioneRichiesta || 30,
+    // propensioneRichiesta: se valorizzato esplicitamente (es. dai test), sovrascrive la formula
+    // basata sull'autonomia in generaRichiesteRound. Di norma resta null: la propensione a
+    // chiamare NON dipende dal cluster, ma viene ricalcolata ogni round dall'autonomia corrente
+    // (vedi collaboratoriConfig.formulaPropensioneChiamata).
+    propensioneRichiesta: null,
     richiestaCorrente: null, // { testo } | null, generata a inizio round
     usiConsecutiviAffiancamento: 0, // per il messaggio narrativo di dipendenza
     uscitoDallaRete: false, // esito del messaggio narrativo di abbandono
@@ -122,11 +126,19 @@ function numeroRoundTotali(fasiConfig) {
 function generaRichiesteRound(tavolo, roundCorrente, fase, fasiConfig, collaboratoriConfig, rng = Math.random) {
   const attivi = tavolo.collaboratori.filter((c) => !c.uscitoDallaRete);
   const moltiplicatore = fase === 3 ? fasiConfig.crisi.moltiplicatorePropensione : 1;
+  const formula = collaboratoriConfig.formulaPropensioneChiamata || { base: 70, fattoreAutonomia: 0, min: 10, max: 90 };
 
   let numeroRichieste = 0;
   for (const collaboratore of attivi) {
+    // La probabilita' di chiamata NON dipende dal cluster: dipende dall'autonomia corrente del
+    // collaboratore (ricalcolata round per round, quindi risponde alle azioni fatte finora).
+    // Un override esplicito su propensioneRichiesta (es. nei test) ha comunque priorita'.
+    const propensioneBase = (collaboratore.propensioneRichiesta !== null && collaboratore.propensioneRichiesta !== undefined)
+      ? collaboratore.propensioneRichiesta
+      : clamp(formula.base - (collaboratore.stats.autonomia || 0) * formula.fattoreAutonomia, formula.min, formula.max);
+
     const propensioneEffettiva = clamp(
-      collaboratore.propensioneRichiesta + tavolo.modificatorePropensioneSistemica,
+      propensioneBase + tavolo.modificatorePropensioneSistemica,
       0, 100
     ) * moltiplicatore;
 

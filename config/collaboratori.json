@@ -1,23 +1,27 @@
 {
-  "_note": "Ogni collaboratore appartiene a un cluster interno (non dichiarato ai partecipanti, usato solo dal motore per calcolare gli effetti). In Fase 1 il tavolo assegna una propria categoria (vedi categorieClassificazione) che resta l'etichetta mostrata in app per tutta la partita, indipendentemente dal cluster reale.",
+  "_note": "Ogni collaboratore appartiene a un cluster interno (non dichiarato ai partecipanti, usato solo dal motore per calcolare gli effetti). In Fase 1 il tavolo assegna una propria categoria (vedi categorieClassificazione) che resta l'etichetta mostrata in app per tutta la partita, indipendentemente dal cluster reale. La probabilita' di chiamata NON dipende piu' dal cluster: dipende dalla stat 'autonomia' del collaboratore (vedi formulaPropensioneChiamata), cosi' che costruire autonomia nel tempo riduca davvero le richieste, indipendentemente da come il tavolo lo ha classificato.",
   "categorieClassificazione": ["Investirei", "Monitorerei", "Lascerei autonomo"],
+  "formulaPropensioneChiamata": {
+    "_note": "propensioneRichiesta (0-100) = clamp(base - autonomia * fattoreAutonomia, min, max), ricalcolata ad ogni round sull'autonomia corrente del collaboratore. Con questi valori: autonomia 80 -> ~31%, autonomia 55 -> ~51%, autonomia 35 -> ~67%. Regolabile qui senza toccare il codice.",
+    "base": 95,
+    "fattoreAutonomia": 0.8,
+    "min": 10,
+    "max": 90
+  },
   "clusterDefinitions": {
     "performer": {
       "label": "Performer",
       "descrizioneInterna": "Produce risultati, richiede poca supervisione. Rischio: diventare dipendente dal manager se seguito troppo.",
-      "propensioneRichiesta": 15,
       "richiesteTipiche": ["Vuole una nuova sfida", "Chiede un riconoscimento formale", "Propone un'idea da testare"]
     },
     "potenziale": {
       "label": "Potenziale",
       "descrizioneInterna": "Motivazione alta, competenze ancora limitate. Collaboratore su cui l'affiancamento produce il maggior ritorno.",
-      "propensioneRichiesta": 45,
       "richiesteTipiche": ["Chiede affiancamento", "Vuole prepararsi alla certificazione", "Chiede un feedback sull'ultimo lavoro"]
     },
     "resistente": {
       "label": "Resistente al cambiamento",
       "descrizioneInterna": "Assorbe molto tempo, produce miglioramenti limitati. Può richiedere strategie diverse, inclusa la surroga.",
-      "propensioneRichiesta": 70,
       "richiesteTipiche": ["Ha perso un cliente", "Vuole confrontarsi su un problema", "Si lamenta del carico di lavoro"]
     }
   },

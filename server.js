@@ -219,6 +219,17 @@ app.get('/api/sessioni/:id', (req, res) => {
   res.json(pacchettoStatoFacilitatore(sessione));
 });
 
+// Elimina definitivamente una sessione (usato dal pulsante "Elimina" nella lista delle
+// sessioni salvate in home facilitatore). Richiede il token facilitatore, cosi' come le
+// altre operazioni sensibili sulla sessione.
+app.delete('/api/sessioni/:id', (req, res) => {
+  const sessione = sessionManager.getSessione(req.params.id);
+  if (!sessione) return res.status(404).json({ errore: 'sessione non trovata' });
+  if (!richiedeTokenFacilitatore(req, res, sessione)) return;
+  sessionManager.eliminaSessione(req.params.id);
+  res.json({ ok: true });
+});
+
 app.get('/api/sessioni/:id/tavoli/:tavoloId/link', async (req, res) => {
   const sessione = sessionManager.getSessione(req.params.id);
   if (!sessione) return res.status(404).json({ errore: 'sessione non trovata' });
