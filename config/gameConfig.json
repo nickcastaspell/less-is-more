@@ -23,13 +23,16 @@
   },
   "oreManagerialiPerRound": 10,
   "durataRoundSecondi": 300,
+  "_notePesi": "Ribilanciato v11: efficienzaTempo non premia piu' il risparmio ore da solo (era possibile ottenere punteggi alti 'non facendo nulla' o abusando di azioni economiche come surroga/delega senza sviluppare le persone) - ora e' proporzionale anche alla crescita reale ottenuta (vedi calcolaClassificaFinale). motivazioneSquadra e coerenzaManageriale sono due pillar nuovi: prima la motivazione non pesava quasi nulla sul punteggio finale (solo indirettamente dentro 'clima', diluita), e la coerenza delle azioni scelte rispetto al cluster reale non veniva mai punteggiata nonostante fosse gia' tracciata (azioniCoerentiCount).",
   "pesiClassifica": {
-    "performanceRete": 0.25,
+    "performanceRete": 0.20,
     "crescitaCollaboratori": 0.20,
-    "efficienzaTempo": 0.20,
-    "autonomiaSquadra": 0.15,
+    "efficienzaTempo": 0.15,
+    "autonomiaSquadra": 0.10,
+    "motivazioneSquadra": 0.10,
     "clima": 0.10,
-    "sostenibilita": 0.10
+    "sostenibilita": 0.10,
+    "coerenzaManageriale": 0.05
   },
   "azioniCoerentiPerCluster": {
     "_note": "Usato per calcolare la metrica coerenzaSituazionale: quota di azioni scelte che il framework indicherebbe come piu' efficaci per quel cluster.",
@@ -43,5 +46,6 @@
     { "id": "ev3", "titolo": "Turnover in un tavolo concorrente", "testo": "Solo narrativo: da leggere in aula per stimolare la competizione, nessun effetto sui punteggi.", "tipo": "narrativo" }
   ],
   "sogliaTurnoverRischioFinale": 60,
-  "penalitaSostenibilitaPerTurnoverAlto": 15
+  "penalitaSostenibilitaPerTurnoverAlto": 15,
+  "penalitaSostenibilitaPerUscito": 20
 }

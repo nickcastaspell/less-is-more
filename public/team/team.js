@@ -230,7 +230,7 @@ function popolaSelectCategoria(select, valoreSelezionato) {
   select.innerHTML = '';
   const optDefault = document.createElement('option');
   optDefault.value = '';
-  optDefault.textContent = '— categorizza —';
+  optDefault.textContent = '— azione —';
   select.appendChild(optDefault);
   state.categorieClassificazione.forEach((categoria) => {
     const opt = document.createElement('option');

@@ -85,7 +85,11 @@ function nuovoTavolo(id, nome, codiceAccesso, collaboratoriConfig, gameConfig) {
       conteggioAzioni: {},
       azioniCoerentiCount: 0,
       azioniTotaliCount: 0,
-      allocazionePerRound: [] // array di { collabId: oreSpese } per round, per calcolare reattivita
+      allocazionePerRound: [], // array di { collabId: oreSpese } per round, per calcolare reattivita
+      // Punti grezzi di coerenza manageriale sulla 'azione' assegnata in Fase 1 (o cambiata dopo),
+      // rispetto al cluster reale del collaboratore (vedi assegnaCategoria e config
+      // collaboratori.json -> azioneCoerentePerCluster / punteggioCoerenzaAzione).
+      punteggioCoerenzaAzione: 0
     },
     // --- Fase 1-4 ---
     modificatorePropensioneSistemica: 0, // cumulato dalle azioni sistemiche di Fase 4
@@ -99,12 +103,25 @@ function nuovoTavolo(id, nome, codiceAccesso, collaboratoriConfig, gameConfig) {
   };
 }
 
-// Assegna/aggiorna la categoria che il tavolo attribuisce a un collaboratore (Fase 1, modificabile in seguito).
-function assegnaCategoria(tavolo, collaboratoreId, categoria, round) {
+// Assegna/aggiorna l'azione che il tavolo attribuisce a un collaboratore (Fase 1, modificabile in
+// seguito). Se collaboratoriConfig contiene azioneCoerentePerCluster/punteggioCoerenzaAzione, ogni
+// assegnazione/cambio viene valutata rispetto al cluster REALE del collaboratore (mai mostrato ai
+// tavoli): coerente = punti, incoerente = malus. Alimenta il pillar "coerenza manageriale" nel
+// punteggio finale (vedi calcolaClassificaFinale).
+function assegnaCategoria(tavolo, collaboratoreId, categoria, round, collaboratoriConfig) {
   const collaboratore = tavolo.collaboratori.find((c) => c.id === collaboratoreId);
   if (!collaboratore) return { ok: false, motivo: 'collaboratore_sconosciuto' };
   collaboratore.categoriaAssegnata = categoria;
   collaboratore.categoriaStorico.push({ round, categoria });
+
+  if (collaboratoriConfig && collaboratoriConfig.azioneCoerentePerCluster) {
+    const azioneCoerente = collaboratoriConfig.azioneCoerentePerCluster[collaboratore.cluster];
+    const punti = collaboratoriConfig.punteggioCoerenzaAzione || { corretto: 2, errato: -1 };
+    if (azioneCoerente) {
+      tavolo.metriche.punteggioCoerenzaAzione += (categoria === azioneCoerente) ? punti.corretto : punti.errato;
+    }
+  }
+
   return { ok: true };
 }
 
@@ -521,32 +538,56 @@ function calcolaClassificaFinale(tavoli, gameConfig) {
   const righe = Object.values(tavoli).map((tavolo) => {
     const ultimo = tavolo.punteggiPerRound[tavolo.punteggiPerRound.length - 1] || {};
     const performanceRete = ultimo.performanceRete || 0;
+    const motivazioneSquadra = ultimo.motivazioneMedia || 0;
 
     const crescita = media(
       tavolo.collaboratori.map((c) => (c.stats.competenza - c.statsIniziali.competenza) + (c.stats.autonomia - c.statsIniziali.autonomia))
     );
     const crescitaNormalizzata = clamp(50 + crescita, 0, 100);
 
+    // Il risparmio di ore vale punti SOLO se e' anche frutto di crescita reale: la base non e'
+    // piu' la sola performanceRete (facilmente pompata con azioni economiche come surroga/delega
+    // senza sviluppare nessuno), ma un mix con crescitaNormalizzata. Cosi' "non fare nulla" o
+    // "tamponare" smettono di essere la strategia piu' efficiente sulla carta.
     const oreTotaliDisponibili = tavolo.punteggiPerRound.length * gameConfig.oreManagerialiPerRound;
+    const baseEfficienza = (performanceRete * 0.6 + crescitaNormalizzata * 0.4) / 100;
     const efficienzaTempo = oreTotaliDisponibili > 0
-      ? clamp((performanceRete / 100) * (1 - (tavolo.metriche.oreTotali / (oreTotaliDisponibili * 1.4))) * 100)
+      ? clamp(baseEfficienza * (1 - (tavolo.metriche.oreTotali / (oreTotaliDisponibili * 1.4))) * 100)
       : 0;
 
     const autonomiaSquadra = ultimo.autonomiaMedia || 0;
     const clima = ultimo.climaTeam || 0;
 
+    // Sostenibilita': penalizza sia il rischio turnover residuo sia, direttamente e in modo
+    // visibile, ogni collaboratore effettivamente uscito dalla rete durante la sessione (prima
+    // pesava solo indirettamente, tramite un rischioTurnover che restava congelato dall'uscita).
+    const usciti = tavolo.collaboratori.filter((c) => c.uscitoDallaRete).length;
+    const penalitaUsciti = usciti * (gameConfig.penalitaSostenibilitaPerUscito || 0);
     const rischioFinale = ultimo.rischioTurnoverMedio || 0;
     const sostenibilita = rischioFinale > gameConfig.sogliaTurnoverRischioFinale
-      ? clamp(100 - rischioFinale - gameConfig.penalitaSostenibilitaPerTurnoverAlto)
-      : clamp(100 - rischioFinale);
+      ? clamp(100 - rischioFinale - gameConfig.penalitaSostenibilitaPerTurnoverAlto - penalitaUsciti)
+      : clamp(100 - rischioFinale - penalitaUsciti);
+
+    // Coerenza manageriale: media di due segnali gia' tracciati dal motore ma finora mai
+    // punteggiati. 1) coerenza dell'azione/categoria assegnata in Fase 1 (o cambiata dopo) col
+    // cluster reale (vedi assegnaCategoria). 2) quota di azioni settimanali coerenti col cluster
+    // realmente scelte round per round (azioniCoerentiCount/azioniTotaliCount, gia' calcolate in
+    // chiudiRound ma prima non entravano nel punteggio finale).
+    const coerenzaCategoria = clamp(50 + (tavolo.metriche.punteggioCoerenzaAzione || 0) * 5);
+    const coerenzaAzioniRound = tavolo.metriche.azioniTotaliCount > 0
+      ? clamp((tavolo.metriche.azioniCoerentiCount / tavolo.metriche.azioniTotaliCount) * 100)
+      : 50;
+    const coerenzaManageriale = (coerenzaCategoria + coerenzaAzioniRound) / 2;
 
     const punteggioTotale =
       performanceRete * pesi.performanceRete +
       crescitaNormalizzata * pesi.crescitaCollaboratori +
       efficienzaTempo * pesi.efficienzaTempo +
       autonomiaSquadra * pesi.autonomiaSquadra +
+      motivazioneSquadra * (pesi.motivazioneSquadra || 0) +
       clima * pesi.clima +
-      sostenibilita * pesi.sostenibilita;
+      sostenibilita * pesi.sostenibilita +
+      coerenzaManageriale * (pesi.coerenzaManageriale || 0);
 
     return {
       tavoloId: tavolo.id,
@@ -555,9 +596,12 @@ function calcolaClassificaFinale(tavoli, gameConfig) {
       crescitaCollaboratori: Math.round(crescitaNormalizzata),
       efficienzaTempo: Math.round(efficienzaTempo),
       autonomiaSquadra: Math.round(autonomiaSquadra),
+      motivazioneSquadra: Math.round(motivazioneSquadra),
       clima: Math.round(clima),
       sostenibilita: Math.round(sostenibilita),
-      punteggioTotale: Math.round(punteggioTotale * 100) / 100
+      coerenzaManageriale: Math.round(coerenzaManageriale),
+      // Scala x100 e arrotondato a intero: numeri piu' larghi e leggibili in aula, niente decimali.
+      punteggioTotale: Math.round(punteggioTotale * 100)
     };
   });
 

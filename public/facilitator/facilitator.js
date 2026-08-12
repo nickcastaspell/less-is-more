@@ -155,8 +155,25 @@ el('btnCreaSessione').addEventListener('click', async () => {
   }
   const sessione = await res.json();
   salvaTokenLocale(sessione.id, sessione.tokenFacilitatore);
+  scaricaCredenziali(sessione.id, sessione.tokenFacilitatore, sessione.nome);
   avviaSessione(sessione.id, sessione.tokenFacilitatore);
 });
+
+// Alla creazione, oltre a salvare il token in questo browser, scarica anche un piccolo file di
+// backup: se il browser dovesse "dimenticare" il token (aggiornamento, pulizia dati, altro
+// dispositivo), il facilitatore ha comunque una copia fuori dal browser.
+function scaricaCredenziali(sessionId, token, nome) {
+  const contenuto = `Less is More - credenziali sessione\nNome: ${nome}\nID sessione: ${sessionId}\nToken facilitatore: ${token}\n\nConserva questo file: serve per riaprire la regia se il browser richiede di nuovo il token.`;
+  const blob = new Blob([contenuto], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `credenziali-${sessionId}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 el('btnResume').addEventListener('click', () => {
   const id = el('inputResumeId').value.trim();
@@ -261,9 +278,35 @@ async function avviaSessione(sessionId, token) {
   state.socket.on('errore', (e) => mostraToast(e.messaggio, 'errore'));
 
   el('statoSessioneBadge').classList.remove('hidden');
+  el('btnTerminaSessione').classList.remove('hidden');
+  el('btnMostraCredenziali').classList.remove('hidden');
+  el('credenzialeId').textContent = sessionId;
+  el('credenzialeToken').textContent = state.token;
 
   await mostraLinkTavoli(sessionId);
 }
+
+// ---------- Termina sessione (sempre raggiungibile dalla barra in alto) ----------
+
+el('btnTerminaSessione').addEventListener('click', () => {
+  if (!state.sessionId) return;
+  if (!confirm('Terminare definitivamente questa sessione adesso? Verranno calcolati i risultati finali con lo stato attuale, anche se non tutte le settimane sono state giocate.')) return;
+  state.socket.emit('facilitatore:terminaSessione', { sessionId: state.sessionId });
+  mostraToast('Sessione terminata: risultati finali calcolati.', 'successo');
+});
+
+// ---------- Credenziali: recupero token/ID nello stesso browser, es. se il browser li richiede
+// di nuovo dopo un aggiornamento (localStorage svuotato o cambio di browser/profilo). ----------
+
+el('btnMostraCredenziali').addEventListener('click', () => {
+  el('boxCredenziali').classList.toggle('hidden');
+});
+
+el('btnCopiaCredenziali').addEventListener('click', () => {
+  const testo = `ID sessione: ${state.sessionId}\nToken facilitatore: ${state.token}`;
+  navigator.clipboard.writeText(testo);
+  mostraToast('Credenziali copiate negli appunti.', 'successo');
+});
 
 async function mostraLinkTavoli(sessionId) {
   const res = await fetch(`/api/sessioni/${sessionId}?tok=${encodeURIComponent(state.token)}`);
@@ -546,8 +589,8 @@ function renderTavoli(tavoli) {
       <div style="margin-top:10px;">
         ${t.collaboratori.map((c) => `
           <div class="collaboratore-riga">
-            <span>${c.uscitoDallaRete ? '✕ ' : ''}${c.nome} <span class="cluster-tag ${c.cluster}">${etichettaCluster(c.cluster)}</span>${c.categoriaAssegnata ? `<span class="categoria-tag">${c.categoriaAssegnata}</span>` : ''}${c.richiestaCorrente ? `<span class="categoria-tag" style="color:var(--gold-400)">chiede: ${c.richiestaCorrente.testo}</span>` : ''}</span>
-            <span class="${c.rischioTurnover >= 50 ? 'rischio-alto' : ''}">R:${c.stats.risultati} M:${c.stats.motivazione} A:${c.stats.autonomia} ${c.rischioTurnover >= 50 ? '⚠' : ''}</span>
+            <span>${c.uscitoDallaRete ? '✕ ' : ''}${c.nome} <span class="stelle-riga-tavolo">${renderStelle(c.stelle)}</span> <span class="cluster-tag ${c.cluster}">${etichettaCluster(c.cluster)}</span>${c.categoriaAssegnata ? `<span class="categoria-tag">${c.categoriaAssegnata}</span>` : ''}${c.richiestaCorrente ? `<span class="categoria-tag" style="color:var(--gold-400)">chiede: ${c.richiestaCorrente.testo}</span>` : ''}</span>
+            <span class="${c.rischioTurnover >= 50 ? 'rischio-alto' : ''}">A:${c.stats.autonomia} M:${c.stats.motivazione} C:${c.stats.competenza} ${c.rischioTurnover >= 50 ? '⚠' : ''}</span>
           </div>
         `).join('')}
       </div>
@@ -584,6 +627,13 @@ function renderTavoli(tavoli) {
   });
 }
 
+// Stessa resa a stelline usata lato tavolo (vedi team.js), cosi' la regia mostra un colpo
+// d'occhio coerente con quello che vedono i partecipanti, invece di soli numeri.
+function renderStelle(n) {
+  const piene = Math.max(0, Math.min(5, n || 0));
+  return '★'.repeat(piene) + '☆'.repeat(5 - piene);
+}
+
 function etichettaCluster(cluster) {
   return { performer: 'Performer', potenziale: 'Potenziale', resistente: 'Resistente' }[cluster] || cluster;
 }
@@ -610,7 +660,8 @@ function renderFinale(sessione) {
     <tr>
       <td>${r.posizione}</td><td>${r.nome}</td><td>${r.performanceRete}</td>
       <td>${r.crescitaCollaboratori}</td><td>${r.efficienzaTempo}</td>
-      <td>${r.autonomiaSquadra}</td><td>${r.clima}</td><td>${r.sostenibilita}</td>
+      <td>${r.autonomiaSquadra}</td><td>${r.motivazioneSquadra}</td><td>${r.clima}</td>
+      <td>${r.sostenibilita}</td><td>${r.coerenzaManageriale}</td>
       <td><strong>${r.punteggioTotale}</strong></td>
     </tr>
   `).join('');

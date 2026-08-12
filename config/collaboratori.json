@@ -1,6 +1,17 @@
 {
-  "_note": "Ogni collaboratore appartiene a un cluster interno (non dichiarato ai partecipanti, usato solo dal motore per calcolare gli effetti). In Fase 1 il tavolo assegna una propria categoria (vedi categorieClassificazione) che resta l'etichetta mostrata in app per tutta la partita, indipendentemente dal cluster reale. La probabilita' di chiamata NON dipende piu' dal cluster: dipende dalla stat 'autonomia' del collaboratore (vedi formulaPropensioneChiamata), cosi' che costruire autonomia nel tempo riduca davvero le richieste, indipendentemente da come il tavolo lo ha classificato.",
-  "categorieClassificazione": ["Investirei", "Monitorerei", "Lascerei autonomo"],
+  "_note": "Ogni collaboratore appartiene a un cluster interno (non dichiarato ai partecipanti, usato solo dal motore per calcolare gli effetti). In Fase 1 il tavolo assegna una propria 'azione' (vedi categorieClassificazione) che resta l'etichetta mostrata in app per tutta la partita, modificabile in ogni momento. Le tre etichette corrispondono esattamente alle azioni gestionali coerenti per i tre cluster reali (vedi azioneCoerentePerCluster): ogni volta che il tavolo assegna/cambia l'azione di un collaboratore, se coincide con quella coerente per il suo cluster reale guadagna punti di 'coerenza manageriale' (vedi punteggioCoerenzaAzione), altrimenti ne perde. La probabilita' di chiamata NON dipende dal cluster: dipende dalla stat 'autonomia' del collaboratore (vedi formulaPropensioneChiamata), cosi' che costruire autonomia nel tempo riduca davvero le richieste, indipendentemente da come il tavolo lo ha classificato.",
+  "categorieClassificazione": ["Autonomia", "Sviluppo", "Monitora"],
+  "azioneCoerentePerCluster": {
+    "_note": "Etichetta 'azione' (tra quelle in categorieClassificazione) coerente con ciascun cluster reale: Performer -> lasciare autonomia, Potenziale -> investire in sviluppo, Resistente -> monitorare/contenere.",
+    "performer": "Autonomia",
+    "potenziale": "Sviluppo",
+    "resistente": "Monitora"
+  },
+  "punteggioCoerenzaAzione": {
+    "_note": "Punti grezzi (accumulati in tavolo.metriche.punteggioCoerenzaAzione) assegnati/tolti ad ogni assegnazione o cambio di 'azione' su un collaboratore, in base alla coerenza con il suo cluster reale.",
+    "corretto": 2,
+    "errato": -1
+  },
   "formulaPropensioneChiamata": {
     "_note": "propensioneRichiesta (0-100) = clamp(base - autonomia * fattoreAutonomia, min, max), ricalcolata ad ogni round sull'autonomia corrente del collaboratore. Con questi valori: autonomia 80 -> ~31%, autonomia 55 -> ~51%, autonomia 35 -> ~67%. Regolabile qui senza toccare il codice.",
     "base": 95,

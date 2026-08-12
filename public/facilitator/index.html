@@ -12,8 +12,19 @@
       <span class="brand-title">LESS IS MORE</span>
       <span class="brand-subtitle">Leadership Through Smart Resource Allocation — Regia</span>
     </div>
-    <div id="statoSessioneBadge" class="badge hidden"></div>
+    <div class="topbar-azioni">
+      <button id="btnMostraCredenziali" class="btn-link hidden" title="Rivedi ID sessione e token facilitatore">Credenziali</button>
+      <div id="statoSessioneBadge" class="badge hidden"></div>
+      <button id="btnTerminaSessione" class="btn btn-attenzione btn-piccolo hidden">Termina sessione</button>
+    </div>
   </header>
+
+  <div id="boxCredenziali" class="box-credenziali hidden">
+    <p class="muted" style="margin:0 0 8px;">Se il browser dovesse richiedere di nuovo il token (es. dopo un aggiornamento), tienili da parte:</p>
+    <div class="riga-credenziale"><span>ID sessione</span><code id="credenzialeId"></code></div>
+    <div class="riga-credenziale"><span>Token facilitatore</span><code id="credenzialeToken"></code></div>
+    <button id="btnCopiaCredenziali" class="btn btn-secondario" style="width:100%;margin-top:8px;">Copia entrambi</button>
+  </div>
 
   <main id="app">
 
@@ -73,7 +84,7 @@
     <section id="schermataFase1" class="schermata hidden">
       <div class="card">
         <h2>Fase 1 — Conoscere</h2>
-        <p class="muted">I tavoli leggono le schede cartacee e classificano ogni collaboratore in app (Investirei / Monitorerei / Lascerei autonomo). Quando ritieni che abbiano finito, passa alla Fase 2 — la categoria resterà comunque modificabile per tutta la partita.</p>
+        <p class="muted">I tavoli leggono le schede cartacee e assegnano un'azione ad ogni collaboratore in app (Autonomia / Sviluppo / Monitora). Quando ritieni che abbiano finito, passa alla Fase 2 — l'azione resterà comunque modificabile per tutta la partita, e ogni cambio giusto o sbagliato rispetto al reale profilo del collaboratore incide sul punteggio di coerenza manageriale.</p>
         <div id="grigliaFase1" class="griglia-tavoli"></div>
         <div class="riga-azioni-fase1">
           <button id="btnTerminaFase1" class="btn btn-primario">Passa alla Fase 2 →</button>
@@ -154,7 +165,7 @@
       <div class="card">
         <h2>Classifica finale</h2>
         <table class="tabella-classifica tabella-classifica-finale">
-          <thead><tr><th>#</th><th>Tavolo</th><th>Performance</th><th>Crescita collaboratori</th><th>Efficienza tempo</th><th>Autonomia</th><th>Clima</th><th>Sostenibilità</th><th>Punteggio</th></tr></thead>
+          <thead><tr><th>#</th><th>Tavolo</th><th>Performance</th><th>Crescita collaboratori</th><th>Efficienza tempo</th><th>Autonomia</th><th>Motivazione</th><th>Clima</th><th>Sostenibilità</th><th>Coerenza manageriale</th><th>Punteggio</th></tr></thead>
           <tbody id="corpoClassificaFinale"></tbody>
         </table>
       </div>
