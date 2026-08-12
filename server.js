@@ -123,6 +123,7 @@ function vistaTavoloPerFacilitatore(tavolo) {
       nome: c.nome,
       cluster: c.cluster,
       stats: c.stats,
+      stelle: gameEngine.calcolaStelle(c.stats, collaboratoriConfig.campiVisibiliAiPartecipanti),
       rischioTurnover: c.rischioTurnover,
       roundConsecutiviTrascurato: c.roundConsecutiviTrascurato,
       categoriaAssegnata: c.categoriaAssegnata,
@@ -363,7 +364,7 @@ io.on('connection', (socket) => {
     if (!ctx) return;
     const { sessione, tavolo, sessionId, tavoloId } = ctx;
     if (sessione.inPausa) return;
-    gameEngine.assegnaCategoria(tavolo, collaboratoreId, categoria, sessione.roundCorrente);
+    gameEngine.assegnaCategoria(tavolo, collaboratoreId, categoria, sessione.roundCorrente, collaboratoriConfig);
     sessionManager.salvaSuDisco();
     io.to(`tavolo:${sessionId}:${tavoloId}`).emit('tavolo:stato', pacchettoStatoTeam(tavolo, sessione));
     io.to(`facilitatore:${sessionId}`).emit('facilitatore:stato', pacchettoStatoFacilitatore(sessione));

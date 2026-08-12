@@ -1,5 +1,19 @@
 @import url("/shared/base.css");
 
+.topbar-azioni { display: flex; align-items: center; gap: 14px; }
+.btn-piccolo { padding: 6px 14px; font-size: 0.8rem; }
+
+.box-credenziali {
+  position: fixed; top: 58px; right: 24px; z-index: 30;
+  background: var(--navy-800); border: 1px solid var(--gold-400); border-radius: var(--radius);
+  padding: 14px 16px; width: 300px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.riga-credenziale {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  font-size: 0.78rem; margin-bottom: 6px; color: var(--text-muted);
+}
+.riga-credenziale code { color: var(--gold-300); background: var(--navy-900); padding: 3px 8px; border-radius: 4px; font-size: 0.78rem; }
+
 .card-form { max-width: 640px; margin: 0 auto 20px; }
 
 .lista-sessioni { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
@@ -66,6 +80,7 @@
 .cluster-tag.resistente { background: #5f2a2a; color: #f0b3a9; }
 
 .rischio-alto { color: var(--red-warn); font-weight: 700; }
+.stelle-riga-tavolo { color: var(--gold-400); font-size: 0.75rem; letter-spacing: 1px; }
 
 .griglia-profili {
   display: grid;
