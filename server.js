@@ -17,6 +17,7 @@ const profiliConfig = require('./config/profili.json');
 const gameConfigDefault = require('./config/gameConfig.json');
 const messaggiNarrativiConfig = require('./config/messaggiNarrativi.json');
 const epilogoConfig = require('./config/epilogo.json');
+const packageJson = require('./package.json');
 
 const PORT = process.env.PORT || 3000;
 
@@ -176,6 +177,12 @@ function pacchettoStatoTeam(tavolo, sessione) {
 }
 
 // ---------- REST API ----------
+
+// Versione corrente, mostrata accanto al titolo in entrambe le UI: utile per capire a colpo
+// d'occhio quale build e' effettivamente in esecuzione (es. dopo un redeploy su Railway).
+app.get('/api/versione', (req, res) => {
+  res.json({ versione: packageJson.version });
+});
 
 // Verifica il token di regia (query string ?tok=...) per le rotte che espongono lo stato
 // completo di una sessione (dati di tutti i tavoli). Il token e' rivelato una sola volta,

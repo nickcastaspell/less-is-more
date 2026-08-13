@@ -50,6 +50,15 @@ html, body {
   color: var(--text-muted);
 }
 
+.versione-badge {
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--text-muted);
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
 .badge {
   padding: 6px 14px;
   border-radius: 20px;

@@ -80,6 +80,11 @@
 .tendenza { font-size: 0.85rem; color: var(--text-muted); }
 .eyebrow-epilogo { text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem; color: var(--text-muted); margin: 0 0 4px; }
 
+.grafico-andamento-svg { width: 100%; height: auto; display: block; }
+.legenda-andamento { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 8px; }
+.legenda-item { display: inline-flex; align-items: center; gap: 5px; font-size: 0.68rem; color: var(--text-muted); }
+.legenda-swatch { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+
 .fase-badge {
   display: inline-block; background: var(--gold-400); color: var(--navy-950);
   font-size: 0.7rem; font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-right: 8px; vertical-align: middle;
