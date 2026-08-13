@@ -261,6 +261,13 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
   let richiesteQuestoRound = 0;
   let richiesteGestiteQuestoRound = 0;
 
+  // Se questo round il tavolo ha scelto almeno un'azione sistemica (Fase 4), un collaboratore
+  // senza azione individuale NON e' stato "trascurato": e' gestito a livello di rete, che e'
+  // esattamente il comportamento maturo che il framework vuole premiare. Senza questa distinzione,
+  // un tavolo che smette giustamente di micro-gestire persone ormai autonome finiva classificato
+  // come "Il Pompiere" (alta quotaNessunIntervento) invece che premiato per l'azione sistemica.
+  const usaAzioneSistemicaQuestoRound = tavolo.azioniSistemicheSottomesseRound.length > 0;
+
   for (const collaboratore of tavolo.collaboratori) {
     if (collaboratore.uscitoDallaRete) continue;
 
@@ -377,10 +384,16 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
     tavolo.log.push({ round: roundNumero, collaboratoreId: collaboratore.id, azioneId, costoOre: azione.costoOre, cluster: collaboratore.cluster });
     tavolo.metriche.oreTotaliPerCollaboratore[collaboratore.id] = (tavolo.metriche.oreTotaliPerCollaboratore[collaboratore.id] || 0) + azione.costoOre;
     tavolo.metriche.oreTotali += azione.costoOre;
-    tavolo.metriche.conteggioAzioni[azioneId] = (tavolo.metriche.conteggioAzioni[azioneId] || 0) + 1;
-    tavolo.metriche.azioniTotaliCount += 1;
-    if ((coerenti[collaboratore.cluster] || []).includes(azioneId)) {
-      tavolo.metriche.azioniCoerentiCount += 1;
+    // Un "nessunIntervento" coperto da un'azione sistemica questo round non conta nelle metriche
+    // di profilo (ne' come nessunIntervento ne' nel denominatore delle azioni totali): il
+    // collaboratore non e' stato trascurato, e' gestito a livello di rete.
+    const coperto = azioneId === 'nessunIntervento' && usaAzioneSistemicaQuestoRound;
+    if (!coperto) {
+      tavolo.metriche.conteggioAzioni[azioneId] = (tavolo.metriche.conteggioAzioni[azioneId] || 0) + 1;
+      tavolo.metriche.azioniTotaliCount += 1;
+      if ((coerenti[collaboratore.cluster] || []).includes(azioneId)) {
+        tavolo.metriche.azioniCoerentiCount += 1;
+      }
     }
 
     collaboratore.ultimaAzione = azioneId;
@@ -485,14 +498,22 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
   const autonomiaMedia = media(tavolo.collaboratori.map((c) => c.stats.autonomia));
   const motivazioneMedia = media(tavolo.collaboratori.map((c) => c.stats.motivazione));
   const rischioMedio = media(tavolo.collaboratori.map((c) => c.rischioTurnover));
+  const crescitaNormalizzata = calcolaCrescitaNormalizzata(tavolo);
+  const motivazioneSquadra = calcolaMotivazioneSquadra(tavolo);
+  const coerenzaManageriale = calcolaCoerenzaManageriale(tavolo);
+  const efficienzaGruppo = calcolaEfficienzaGruppo(performanceRete, crescitaNormalizzata, tavolo.climaTeam);
 
   tavolo.punteggiPerRound.push({
     round: roundNumero,
     performanceRete: Math.round(performanceRete),
     autonomiaMedia: Math.round(autonomiaMedia),
     motivazioneMedia: Math.round(motivazioneMedia),
+    motivazioneSquadra: Math.round(motivazioneSquadra),
+    crescita: Math.round(crescitaNormalizzata),
     climaTeam: Math.round(tavolo.climaTeam),
     rischioTurnoverMedio: Math.round(rischioMedio),
+    coerenzaManageriale: Math.round(coerenzaManageriale),
+    efficienzaGruppo: Math.round(efficienzaGruppo),
     oreUsate: tavolo.oreUsateRound
   });
 
@@ -505,6 +526,49 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
 function media(arr) {
   if (!arr.length) return 0;
   return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+// ---------- Metriche derivate condivise tra chiudiRound (storico per round, usato dal grafico
+// andamento) e calcolaClassificaFinale (punteggio finale) — stessa formula in entrambi i posti,
+// cosi' l'ultimo punto del grafico coincide sempre col punteggio finale mostrato in classifica. ----------
+
+// Crescita normalizzata 0-100 (50 = nessuna crescita netta) su competenza+autonomia rispetto
+// all'inizio sessione.
+function calcolaCrescitaNormalizzata(tavolo) {
+  const crescita = media(
+    tavolo.collaboratori.map((c) => (c.stats.competenza - c.statsIniziali.competenza) + (c.stats.autonomia - c.statsIniziali.autonomia))
+  );
+  return clamp(50 + crescita, 0, 100);
+}
+
+// Motivazione di squadra ai fini del punteggio: SOLO performer e potenziale. Le azioni coerenti
+// sui resistenti (monitoraggio/surroga/feedback) fanno scendere la loro motivazione per design
+// (realistico: un resistente al cambiamento non si entusiasma perche' lo si monitora) - includerli
+// nella media trascinerebbe in basso il punteggio anche di un tavolo che gestisce tutto correttamente.
+function calcolaMotivazioneSquadra(tavolo) {
+  const attivi = tavolo.collaboratori.filter((c) => !c.uscitoDallaRete);
+  const sviluppabili = attivi.filter((c) => c.cluster !== 'resistente');
+  const pool = sviluppabili.length > 0 ? sviluppabili : attivi;
+  if (pool.length === 0) return 0;
+  return media(pool.map((c) => c.stats.motivazione));
+}
+
+// Coerenza manageriale 0-100: media di due segnali. 1) coerenza dell'azione/categoria assegnata
+// (Fase 1 o cambiata dopo) col cluster reale. 2) quota di azioni settimanali effettivamente
+// coerenti col cluster tra quelle scelte round per round.
+function calcolaCoerenzaManageriale(tavolo) {
+  const coerenzaCategoria = clamp(50 + (tavolo.metriche.punteggioCoerenzaAzione || 0) * 5);
+  const coerenzaAzioniRound = tavolo.metriche.azioniTotaliCount > 0
+    ? clamp((tavolo.metriche.azioniCoerentiCount / tavolo.metriche.azioniTotaliCount) * 100)
+    : 50;
+  return (coerenzaCategoria + coerenzaAzioniRound) / 2;
+}
+
+// Efficienza di gruppo 0-100: quanto il gruppo nel suo insieme e' cresciuto grazie all'azione
+// manageriale — mix di risultati, crescita/sviluppo e clima (a differenza di efficienzaTempo, non
+// tiene conto delle ore: e' un indicatore di qualita' dell'esito, non di velocita').
+function calcolaEfficienzaGruppo(performanceRete, crescitaNormalizzata, climaTeam) {
+  return clamp(performanceRete * 0.4 + crescitaNormalizzata * 0.4 + climaTeam * 0.2);
 }
 
 // Freccia di tendenza per una stat: confronta l'ultima rilevazione con la media mobile delle
@@ -538,12 +602,14 @@ function calcolaClassificaFinale(tavoli, gameConfig) {
   const righe = Object.values(tavoli).map((tavolo) => {
     const ultimo = tavolo.punteggiPerRound[tavolo.punteggiPerRound.length - 1] || {};
     const performanceRete = ultimo.performanceRete || 0;
-    const motivazioneSquadra = ultimo.motivazioneMedia || 0;
 
-    const crescita = media(
-      tavolo.collaboratori.map((c) => (c.stats.competenza - c.statsIniziali.competenza) + (c.stats.autonomia - c.statsIniziali.autonomia))
-    );
-    const crescitaNormalizzata = clamp(50 + crescita, 0, 100);
+    // Le formule che seguono sono condivise con chiudiRound (vedi calcolaCrescitaNormalizzata,
+    // calcolaMotivazioneSquadra, calcolaCoerenzaManageriale, calcolaEfficienzaGruppo): stessa
+    // definizione usata per lo storico per round (grafico andamento) e per il punteggio finale.
+    const crescitaNormalizzata = calcolaCrescitaNormalizzata(tavolo);
+    const motivazioneSquadra = calcolaMotivazioneSquadra(tavolo);
+    const coerenzaManageriale = calcolaCoerenzaManageriale(tavolo);
+    const efficienzaGruppo = calcolaEfficienzaGruppo(performanceRete, crescitaNormalizzata, tavolo.climaTeam);
 
     // Il risparmio di ore vale punti SOLO se e' anche frutto di crescita reale: la base non e'
     // piu' la sola performanceRete (facilmente pompata con azioni economiche come surroga/delega
@@ -568,17 +634,6 @@ function calcolaClassificaFinale(tavoli, gameConfig) {
       ? clamp(100 - rischioFinale - gameConfig.penalitaSostenibilitaPerTurnoverAlto - penalitaUsciti)
       : clamp(100 - rischioFinale - penalitaUsciti);
 
-    // Coerenza manageriale: media di due segnali gia' tracciati dal motore ma finora mai
-    // punteggiati. 1) coerenza dell'azione/categoria assegnata in Fase 1 (o cambiata dopo) col
-    // cluster reale (vedi assegnaCategoria). 2) quota di azioni settimanali coerenti col cluster
-    // realmente scelte round per round (azioniCoerentiCount/azioniTotaliCount, gia' calcolate in
-    // chiudiRound ma prima non entravano nel punteggio finale).
-    const coerenzaCategoria = clamp(50 + (tavolo.metriche.punteggioCoerenzaAzione || 0) * 5);
-    const coerenzaAzioniRound = tavolo.metriche.azioniTotaliCount > 0
-      ? clamp((tavolo.metriche.azioniCoerentiCount / tavolo.metriche.azioniTotaliCount) * 100)
-      : 50;
-    const coerenzaManageriale = (coerenzaCategoria + coerenzaAzioniRound) / 2;
-
     const punteggioTotale =
       performanceRete * pesi.performanceRete +
       crescitaNormalizzata * pesi.crescitaCollaboratori +
@@ -600,6 +655,7 @@ function calcolaClassificaFinale(tavoli, gameConfig) {
       clima: Math.round(clima),
       sostenibilita: Math.round(sostenibilita),
       coerenzaManageriale: Math.round(coerenzaManageriale),
+      efficienzaGruppo: Math.round(efficienzaGruppo),
       // Scala x100 e arrotondato a intero: numeri piu' larghi e leggibili in aula, niente decimali.
       punteggioTotale: Math.round(punteggioTotale * 100)
     };
@@ -621,6 +677,15 @@ function calcolaEpilogo(tavolo, epilogoConfig) {
   const rischioTurnoverMedio = ultimo.rischioTurnoverMedio || 0;
   const usciti = tavolo.collaboratori.filter((c) => c.uscitoDallaRete);
 
+  // Quota di decisioni individuali che sono restate "nessun intervento", calcolata sul log
+  // grezzo (non sulle metriche di profilo, che escludono i round coperti da azioni sistemiche):
+  // qui serve la misura letterale di quanto il tavolo ha agito o meno, per riconoscere un tavolo
+  // che non ha mai giocato.
+  const totaleVociLog = tavolo.log.length;
+  const voceNessunIntervento = tavolo.log.filter((v) => v.azioneId === 'nessunIntervento').length;
+  const quotaNessunIntervento = totaleVociLog > 0 ? voceNessunIntervento / totaleVociLog : 0;
+  const azioniSistemicheUsate = (tavolo.azioniSistemicheLog || []).length;
+
   const contesto = {
     numUsciti: usciti.length,
     nomiUsciti: usciti.map((c) => c.nome).join(', ') || 'nessuno'
@@ -633,6 +698,8 @@ function calcolaEpilogo(tavolo, epilogoConfig) {
     if (cond.autonomiaMediaMax !== undefined && autonomiaMedia > cond.autonomiaMediaMax) continue;
     if (cond.rischioTurnoverMedioMin !== undefined && rischioTurnoverMedio < cond.rischioTurnoverMedioMin) continue;
     if (cond.rischioTurnoverMedioMax !== undefined && rischioTurnoverMedio > cond.rischioTurnoverMedioMax) continue;
+    if (cond.quotaNessunInterventoMin !== undefined && quotaNessunIntervento < cond.quotaNessunInterventoMin) continue;
+    if (cond.azioniSistemicheUsateMax !== undefined && azioniSistemicheUsate > cond.azioniSistemicheUsateMax) continue;
 
     let testo = scenario.template;
     for (const [chiave, valore] of Object.entries(contesto)) {

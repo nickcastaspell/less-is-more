@@ -180,8 +180,15 @@ function pacchettoStatoTeam(tavolo, sessione) {
 // Verifica il token di regia (query string ?tok=...) per le rotte che espongono lo stato
 // completo di una sessione (dati di tutti i tavoli). Il token e' rivelato una sola volta,
 // nella risposta di POST /api/sessioni, a chi ha creato la sessione.
+//
+// Se e' impostata la variabile d'ambiente ADMIN_TOKEN, quel valore funziona come token
+// universale per QUALSIASI sessione: serve solo a chi ha accesso al server (es. per eliminare
+// vecchie sessioni di cui si e' perso il token facilitatore specifico). Se ADMIN_TOKEN non e'
+// impostata, questo bypass e' semplicemente disattivato.
 function richiedeTokenFacilitatore(req, res, sessione) {
   const tok = req.query.tok;
+  const adminToken = process.env.ADMIN_TOKEN;
+  if (adminToken && tok === adminToken) return true;
   if (!tok || tok !== sessione.tokenFacilitatore) {
     res.status(403).json({ errore: 'token facilitatore mancante o non valido' });
     return false;
@@ -287,6 +294,7 @@ app.get('/config/pubblico', (req, res) => {
     azioniSistemiche: azioniSistemicheConfig.azioniSistemiche,
     eventiFacilitatore: gameConfigDefault.eventiFacilitatore,
     categorieClassificazione: collaboratoriConfig.categorieClassificazione,
+    azioneCoerentePerCluster: collaboratoriConfig.azioneCoerentePerCluster,
     fasi: gameConfigDefault.fasi
   });
 });
@@ -302,7 +310,9 @@ io.on('connection', (socket) => {
   socket.on('facilitatore:join', ({ sessionId, tok }) => {
     const sessione = sessionManager.getSessione(sessionId);
     if (!sessione) return socket.emit('errore', { messaggio: 'sessione non trovata' });
-    if (!tok || tok !== sessione.tokenFacilitatore) {
+    const adminToken = process.env.ADMIN_TOKEN;
+    const tokenValido = (adminToken && tok === adminToken) || tok === sessione.tokenFacilitatore;
+    if (!tok || !tokenValido) {
       return socket.emit('errore', { messaggio: 'token facilitatore mancante o non valido' });
     }
     socket.join(`facilitatore:${sessionId}`);

@@ -3,6 +3,12 @@
   "titoloSezione": "Una settimana senza di te",
   "scenari": [
     {
+      "id": "rete_abbandonata",
+      "condizioni": { "quotaNessunInterventoMin": 0.9, "azioniSistemicheUsateMax": 0 },
+      "titolo": "Una rete lasciata a sé stessa",
+      "template": "Va bene che less is more, ma qualcosa devi pur fare! I collaboratori si sono sentiti tutti abbandonati: i performer non vi ascolteranno mai più, quelli in sviluppo cercheranno altri leader, e i resistenti… beh, avevano ragione loro."
+    },
+    {
       "id": "rete_in_crisi",
       "condizioni": { "usciriDallaReteMin": 1 },
       "titolo": "La rete si è ridotta",
