@@ -261,6 +261,7 @@ async function avviaSessione(sessionId, token) {
   state.azioni = config.azioni;
   state.azioniSistemiche = config.azioniSistemiche;
   state.fasiConfig = config.fasi;
+  state.azioneCoerentePerCluster = config.azioneCoerentePerCluster;
   popolaSelectEventi();
 
   state.socket = io();
@@ -273,6 +274,19 @@ async function avviaSessione(sessionId, token) {
   });
   state.socket.on('facilitatore:stato', (statoSessione) => {
     state.ultimoStato = statoSessione;
+    if (state.terminazioneManualeInCorso) {
+      // Dopo "Termina sessione" torniamo alla home invece di mostrare i risultati finali: i
+      // risultati restano comunque calcolati e salvati, riapribili in seguito con "Riprendi".
+      state.terminazioneManualeInCorso = false;
+      state.socket.disconnect();
+      el('statoSessioneBadge').classList.add('hidden');
+      el('btnTerminaSessione').classList.add('hidden');
+      el('btnMostraCredenziali').classList.add('hidden');
+      el('boxCredenziali').classList.add('hidden');
+      mostraSchermata('schermataCreazione');
+      caricaListaSessioni();
+      return;
+    }
     renderStato(statoSessione);
   });
   state.socket.on('errore', (e) => mostraToast(e.messaggio, 'errore'));
@@ -290,9 +304,10 @@ async function avviaSessione(sessionId, token) {
 
 el('btnTerminaSessione').addEventListener('click', () => {
   if (!state.sessionId) return;
-  if (!confirm('Terminare definitivamente questa sessione adesso? Verranno calcolati i risultati finali con lo stato attuale, anche se non tutte le settimane sono state giocate.')) return;
+  if (!confirm('Terminare definitivamente questa sessione adesso? Verranno calcolati i risultati finali con lo stato attuale (riapribili in seguito con "Riprendi"), e tornerai alla schermata iniziale.')) return;
+  state.terminazioneManualeInCorso = true;
   state.socket.emit('facilitatore:terminaSessione', { sessionId: state.sessionId });
-  mostraToast('Sessione terminata: risultati finali calcolati.', 'successo');
+  mostraToast('Sessione terminata: risultati finali calcolati e salvati.', 'successo');
 });
 
 // ---------- Credenziali: recupero token/ID nello stesso browser, es. se il browser li richiede
@@ -550,8 +565,21 @@ function renderFase1(sessione) {
     card.className = 'tavolo-card';
     card.innerHTML = `
       <div class="tavolo-card-header"><h4>${t.nome}</h4></div>
-      <div class="progresso-classificazione">${classificati}/${totale} collaboratori classificati</div>
+      <div class="progresso-classificazione">${classificati}/${totale} collaboratori con azione assegnata</div>
       <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${totale > 0 ? Math.round((classificati / totale) * 100) : 0}%"></div></div>
+      <div style="margin-top:10px;">
+        ${t.collaboratori.map((c) => {
+          const azioneCoerente = (state.azioneCoerentePerCluster || {})[c.cluster];
+          const coerente = c.categoriaAssegnata && azioneCoerente && c.categoriaAssegnata === azioneCoerente;
+          const incoerente = c.categoriaAssegnata && azioneCoerente && c.categoriaAssegnata !== azioneCoerente;
+          return `
+          <div class="collaboratore-riga">
+            <span>${c.nome} <span class="stelle-riga-tavolo">${renderStelle(c.stelle)}</span> <span class="cluster-tag ${c.cluster}">${etichettaCluster(c.cluster)}</span>${c.categoriaAssegnata ? `<span class="categoria-tag${coerente ? ' categoria-coerente' : ''}${incoerente ? ' categoria-incoerente' : ''}">${c.categoriaAssegnata}</span>` : '<span class="categoria-tag categoria-vuota">— in attesa —</span>'}</span>
+            <span>A:${c.stats.autonomia} M:${c.stats.motivazione} C:${c.stats.competenza}</span>
+          </div>
+        `;
+        }).join('')}
+      </div>
     `;
     griglia.appendChild(card);
   });
@@ -634,6 +662,48 @@ function renderStelle(n) {
   return '★'.repeat(piene) + '☆'.repeat(5 - piene);
 }
 
+// ---------- Grafico andamento indicatori per tavolo (debrief finale) ----------
+// Ordine di priorita' indicato: crescita, autonomia, motivazione, clima, efficienza gruppo,
+// coerenza manageriale. Tutti e 6 in un unico grafico a linee compatto, un tavolo per card.
+const SERIE_ANDAMENTO = [
+  { chiave: 'crescita', label: 'Crescita', colore: '#4caf7d' },
+  { chiave: 'autonomiaMedia', label: 'Autonomia', colore: '#d9b45c' },
+  { chiave: 'motivazioneSquadra', label: 'Motivazione', colore: '#e8ca87' },
+  { chiave: 'climaTeam', label: 'Clima', colore: '#5aa9e6' },
+  { chiave: 'efficienzaGruppo', label: 'Efficienza gruppo', colore: '#d16fd1' },
+  { chiave: 'coerenzaManageriale', label: 'Coerenza manageriale', colore: '#e06a5a' }
+];
+
+function renderGraficoAndamento(tavolo) {
+  const storico = tavolo.storicoPunteggi || [];
+  if (storico.length === 0) {
+    return '<p class="muted" style="font-size:0.78rem;">Nessun dato di andamento disponibile: nessuna settimana ancora chiusa.</p>';
+  }
+  const W = 380, H = 150, PAD_L = 26, PAD_R = 8, PAD_T = 10, PAD_B = 18;
+  const n = storico.length;
+  const xFor = (i) => PAD_L + (n > 1 ? (i / (n - 1)) * (W - PAD_L - PAD_R) : (W - PAD_L - PAD_R) / 2);
+  const yFor = (v) => H - PAD_B - (Math.max(0, Math.min(100, v || 0)) / 100) * (H - PAD_T - PAD_B);
+
+  const griglia = [0, 50, 100].map((v) => `
+    <line x1="${PAD_L}" y1="${yFor(v).toFixed(1)}" x2="${W - PAD_R}" y2="${yFor(v).toFixed(1)}" stroke="#1e2f50" stroke-width="1" />
+    <text x="${PAD_L - 4}" y="${(yFor(v) + 3).toFixed(1)}" font-size="7" fill="#9aa7bd" text-anchor="end">${v}</text>
+  `).join('');
+
+  const linee = SERIE_ANDAMENTO.map((serie) => {
+    const punti = storico.map((r, i) => `${xFor(i).toFixed(1)},${yFor(r[serie.chiave]).toFixed(1)}`).join(' ');
+    return `<polyline points="${punti}" fill="none" stroke="${serie.colore}" stroke-width="2" />`;
+  }).join('');
+
+  const assiX = storico.map((r, i) => `<text x="${xFor(i).toFixed(1)}" y="${H - 4}" font-size="7" fill="#9aa7bd" text-anchor="middle">S${r.round}</text>`).join('');
+
+  const legenda = SERIE_ANDAMENTO.map((serie) => `<span class="legenda-item"><span class="legenda-swatch" style="background:${serie.colore}"></span>${serie.label}</span>`).join('');
+
+  return `
+    <svg viewBox="0 0 ${W} ${H}" class="grafico-andamento-svg">${griglia}${linee}${assiX}</svg>
+    <div class="legenda-andamento">${legenda}</div>
+  `;
+}
+
 function etichettaCluster(cluster) {
   return { performer: 'Performer', potenziale: 'Potenziale', resistente: 'Resistente' }[cluster] || cluster;
 }
@@ -701,6 +771,18 @@ function renderFinale(sessione) {
   }
 
   renderGraficoRichieste(el('grigliaGraficiRichiesteFinale'), sessione.tavoli);
+
+  const grigliaAndamento = el('grigliaAndamentoTavoli');
+  if (grigliaAndamento) {
+    grigliaAndamento.innerHTML = '';
+    for (const tavolo of sessione.tavoli) {
+      const card = document.createElement('div');
+      card.className = 'profilo-card';
+      card.innerHTML = `<div class="tavolo-nome">${tavolo.nome}</div>${renderGraficoAndamento(tavolo)}`;
+      grigliaAndamento.appendChild(card);
+    }
+  }
+
   popolaSelectTavoloLog(sessione.tavoli);
   mostraSchermata('schermataFinale');
 }

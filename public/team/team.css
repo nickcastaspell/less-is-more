@@ -78,6 +78,7 @@
 .posizione-finale, .punteggio-finale { font-size: 1.4rem; margin: 10px 0; color: var(--gold-300); }
 .profilo-finale-card { max-width: 520px; margin: 0 auto; }
 .tendenza { font-size: 0.85rem; color: var(--text-muted); }
+.eyebrow-epilogo { text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem; color: var(--text-muted); margin: 0 0 4px; }
 
 .fase-badge {
   display: inline-block; background: var(--gold-400); color: var(--navy-950);

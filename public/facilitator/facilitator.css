@@ -97,6 +97,11 @@
 .profilo-card .tavolo-nome { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
 .profilo-card .tendenza { font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; }
 
+.grafico-andamento-svg { width: 100%; height: auto; display: block; }
+.legenda-andamento { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 8px; }
+.legenda-item { display: inline-flex; align-items: center; gap: 5px; font-size: 0.68rem; color: var(--text-muted); }
+.legenda-swatch { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+
 .lista-debrief { line-height: 1.9; }
 
 .fase-badge {
@@ -167,6 +172,9 @@
 .mini-grafico-richieste .barra-lbl { font-size: 0.6rem; color: var(--text-muted); margin-top: 2px; }
 
 .categoria-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: var(--navy-700); color: var(--gold-300); }
+.categoria-tag.categoria-coerente { background: #1e3a2c; color: var(--green-ok); border: 1px solid var(--green-ok); }
+.categoria-tag.categoria-incoerente { background: #3a1f1a; color: var(--red-warn); border: 1px solid var(--red-warn); }
+.categoria-tag.categoria-vuota { background: transparent; color: var(--text-muted); font-style: italic; }
 .messaggio-narrativo-tag { font-size: 0.65rem; color: #d19bd6; margin-top: 6px; display: block; }
 .progresso-classificazione { font-size: 0.75rem; color: var(--text-muted); }
 
