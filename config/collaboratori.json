@@ -23,18 +23,29 @@
     "performer": {
       "label": "Performer",
       "descrizioneInterna": "Produce risultati, richiede poca supervisione. Rischio: diventare dipendente dal manager se seguito troppo.",
-      "richiesteTipiche": ["Vuole una nuova sfida", "Chiede un riconoscimento formale", "Propone un'idea da testare"]
+      "richiesteTipiche": ["Vuole una nuova sfida", "Chiede un riconoscimento formale", "Propone un'idea da testare"],
+      "sogliaTrascuratezza": 5
     },
     "potenziale": {
       "label": "Potenziale",
       "descrizioneInterna": "Motivazione alta, competenze ancora limitate. Collaboratore su cui l'affiancamento produce il maggior ritorno.",
-      "richiesteTipiche": ["Chiede affiancamento", "Vuole prepararsi alla certificazione", "Chiede un feedback sull'ultimo lavoro"]
+      "richiesteTipiche": ["Chiede affiancamento", "Vuole prepararsi alla certificazione", "Chiede un feedback sull'ultimo lavoro"],
+      "sogliaTrascuratezza": 2
     },
     "resistente": {
       "label": "Resistente al cambiamento",
       "descrizioneInterna": "Assorbe molto tempo, produce miglioramenti limitati. Può richiedere strategie diverse, inclusa la surroga.",
-      "richiesteTipiche": ["Ha perso un cliente", "Vuole confrontarsi su un problema", "Si lamenta del carico di lavoro"]
+      "richiesteTipiche": ["Ha perso un cliente", "Vuole confrontarsi su un problema", "Si lamenta del carico di lavoro"],
+      "sogliaTrascuratezza": 2
     }
+  },
+  "riclassificazione": {
+    "_note": "Un collaboratore del cluster 'da' che raggiunge/supera le soglie per 'roundConsecutiviRichiesti' chiusure di round consecutive viene riclassificato al cluster 'a': da quel momento propensione a chiamare, azione coerente e narrativa seguono le regole del nuovo cluster. Sempre segnalato con un messaggio esplicito al tavolo (mai silenzioso).",
+    "da": "potenziale",
+    "a": "performer",
+    "competenzaMin": 70,
+    "autonomiaMin": 65,
+    "roundConsecutiviRichiesti": 2
   },
   "templateSquadra": [
     {

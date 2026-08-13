@@ -111,6 +111,12 @@ function renderGraficoRichieste(container, tavoli) {
 
 const el = (id) => document.getElementById(id);
 
+// Mostra la versione corrente accanto al titolo (utile per capire quale build e' in esecuzione).
+fetch('/api/versione').then((r) => r.json()).then((d) => {
+  const badge = el('versioneBadge');
+  if (badge && d.versione) badge.textContent = `v${d.versione}`;
+}).catch(() => {});
+
 function mostraSchermata(nomeSchermata) {
   document.querySelectorAll('.schermata').forEach((s) => s.classList.add('hidden'));
   el(nomeSchermata).classList.remove('hidden');
@@ -682,9 +688,22 @@ function renderGraficoAndamento(tavolo) {
   const W = 380, H = 150, PAD_L = 26, PAD_R = 8, PAD_T = 10, PAD_B = 18;
   const n = storico.length;
   const xFor = (i) => PAD_L + (n > 1 ? (i / (n - 1)) * (W - PAD_L - PAD_R) : (W - PAD_L - PAD_R) / 2);
-  const yFor = (v) => H - PAD_B - (Math.max(0, Math.min(100, v || 0)) / 100) * (H - PAD_T - PAD_B);
 
-  const griglia = [0, 50, 100].map((v) => `
+  // Scala verticale dinamica sui valori reali (non fissa 0-100): con indicatori che oscillano
+  // es. tra 40 e 100, un asse fisso appiattisce le linee vicino al bordo superiore e rende
+  // il grafico illeggibile. Margine di 5 punti e arrotondamento a decine per assi puliti;
+  // range minimo di 20 punti per evitare di "zoomare" troppo su serie quasi piatte.
+  const tuttiValori = storico.flatMap((r) => SERIE_ANDAMENTO.map((s) => r[s.chiave] || 0));
+  let minV = Math.max(0, Math.floor((Math.min(...tuttiValori) - 5) / 10) * 10);
+  let maxV = Math.min(100, Math.ceil((Math.max(...tuttiValori) + 5) / 10) * 10);
+  if (maxV - minV < 20) {
+    maxV = Math.min(100, minV + 20);
+    minV = Math.max(0, maxV - 20);
+  }
+  const yFor = (v) => H - PAD_B - ((Math.max(minV, Math.min(maxV, v || 0)) - minV) / (maxV - minV)) * (H - PAD_T - PAD_B);
+
+  const valoriGriglia = [minV, Math.round((minV + maxV) / 2), maxV];
+  const griglia = valoriGriglia.map((v) => `
     <line x1="${PAD_L}" y1="${yFor(v).toFixed(1)}" x2="${W - PAD_R}" y2="${yFor(v).toFixed(1)}" stroke="#1e2f50" stroke-width="1" />
     <text x="${PAD_L - 4}" y="${(yFor(v) + 3).toFixed(1)}" font-size="7" fill="#9aa7bd" text-anchor="end">${v}</text>
   `).join('');

@@ -14,6 +14,12 @@ const state = {
 };
 
 const el = (id) => document.getElementById(id);
+
+// Mostra la versione corrente accanto al titolo (utile per capire quale build e' in esecuzione).
+fetch('/api/versione').then((r) => r.json()).then((d) => {
+  const badge = el('versioneBadge');
+  if (badge && d.versione) badge.textContent = `v${d.versione}`;
+}).catch(() => {});
 const ETICHETTE_STAT = {
   competenza: 'Competenza', autonomia: 'Autonomia', motivazione: 'Motivazione',
   resilienza: 'Resilienza', velocitaApprendimento: 'Velocità apprendimento', risultati: 'Risultati'
@@ -50,6 +56,55 @@ function renderBarreStat(container, c) {
     `;
     container.appendChild(riga);
   });
+}
+
+// ---------- Grafico andamento indicatori del proprio tavolo (schermata finale) ----------
+// Stessa logica di facilitator.js (scala verticale dinamica sui valori reali, non fissa 0-100).
+const SERIE_ANDAMENTO = [
+  { chiave: 'crescita', label: 'Crescita', colore: '#4caf7d' },
+  { chiave: 'autonomiaMedia', label: 'Autonomia', colore: '#d9b45c' },
+  { chiave: 'motivazioneSquadra', label: 'Motivazione', colore: '#e8ca87' },
+  { chiave: 'climaTeam', label: 'Clima', colore: '#5aa9e6' },
+  { chiave: 'efficienzaGruppo', label: 'Efficienza gruppo', colore: '#d16fd1' },
+  { chiave: 'coerenzaManageriale', label: 'Coerenza manageriale', colore: '#e06a5a' }
+];
+
+function renderGraficoAndamento(storico) {
+  if (!storico || storico.length === 0) {
+    return '<p class="muted" style="font-size:0.78rem;">Nessun dato di andamento disponibile: nessuna settimana ancora chiusa.</p>';
+  }
+  const W = 380, H = 150, PAD_L = 26, PAD_R = 8, PAD_T = 10, PAD_B = 18;
+  const n = storico.length;
+  const xFor = (i) => PAD_L + (n > 1 ? (i / (n - 1)) * (W - PAD_L - PAD_R) : (W - PAD_L - PAD_R) / 2);
+
+  const tuttiValori = storico.flatMap((r) => SERIE_ANDAMENTO.map((s) => r[s.chiave] || 0));
+  let minV = Math.max(0, Math.floor((Math.min(...tuttiValori) - 5) / 10) * 10);
+  let maxV = Math.min(100, Math.ceil((Math.max(...tuttiValori) + 5) / 10) * 10);
+  if (maxV - minV < 20) {
+    maxV = Math.min(100, minV + 20);
+    minV = Math.max(0, maxV - 20);
+  }
+  const yFor = (v) => H - PAD_B - ((Math.max(minV, Math.min(maxV, v || 0)) - minV) / (maxV - minV)) * (H - PAD_T - PAD_B);
+
+  const valoriGriglia = [minV, Math.round((minV + maxV) / 2), maxV];
+  const griglia = valoriGriglia.map((v) => `
+    <line x1="${PAD_L}" y1="${yFor(v).toFixed(1)}" x2="${W - PAD_R}" y2="${yFor(v).toFixed(1)}" stroke="#1e2f50" stroke-width="1" />
+    <text x="${PAD_L - 4}" y="${(yFor(v) + 3).toFixed(1)}" font-size="7" fill="#9aa7bd" text-anchor="end">${v}</text>
+  `).join('');
+
+  const linee = SERIE_ANDAMENTO.map((serie) => {
+    const punti = storico.map((r, i) => `${xFor(i).toFixed(1)},${yFor(r[serie.chiave]).toFixed(1)}`).join(' ');
+    return `<polyline points="${punti}" fill="none" stroke="${serie.colore}" stroke-width="2" />`;
+  }).join('');
+
+  const assiX = storico.map((r, i) => `<text x="${xFor(i).toFixed(1)}" y="${H - 4}" font-size="7" fill="#9aa7bd" text-anchor="middle">S${r.round}</text>`).join('');
+
+  const legenda = SERIE_ANDAMENTO.map((serie) => `<span class="legenda-item"><span class="legenda-swatch" style="background:${serie.colore}"></span>${serie.label}</span>`).join('');
+
+  return `
+    <svg viewBox="0 0 ${W} ${H}" class="grafico-andamento-svg">${griglia}${linee}${assiX}</svg>
+    <div class="legenda-andamento">${legenda}</div>
+  `;
 }
 
 function mostraSchermata(nome) {
@@ -674,6 +729,10 @@ function renderFinale(vista) {
     el('epilogoTitolo').textContent = vista.epilogo.titolo;
     el('epilogoTesto').textContent = vista.epilogo.testo;
     el('cardEpilogoFinale').classList.remove('hidden');
+  }
+  const grigliaAndamento = el('grigliaAndamentoTeam');
+  if (grigliaAndamento) {
+    grigliaAndamento.innerHTML = renderGraficoAndamento(vista.storicoPunteggi);
   }
   mostraSchermata('schermataFinaleTeam');
 }

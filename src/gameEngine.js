@@ -55,6 +55,10 @@ function creaCollaboratoriPerTavolo(templateSquadra, collaboratoriConfig) {
     richiestaCorrente: null, // { testo } | null, generata a inizio round
     usiConsecutiviAffiancamento: 0, // per il messaggio narrativo di dipendenza
     uscitoDallaRete: false, // esito del messaggio narrativo di abbandono
+    // --- Riclassificazione dinamica (vedi collaboratoriConfig.riclassificazione) ---
+    roundConsecutiviSogliaRiclassificazione: 0,
+    clusterOriginale: null, // valorizzato solo se il cluster reale e' stato riassegnato in corsa
+    riclassificatoAlRound: null,
     // storicoStats: uno snapshot delle stat visibili alla chiusura di ogni round, usato per
     // calcolare le frecce di tendenza (confronto con la media mobile delle rilevazioni precedenti)
     // senza dover ricalcolare a ritroso gli effetti gia' applicati.
@@ -329,11 +333,17 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
     } else {
       collaboratore.roundConsecutiviMotivazioneBassa = Math.max(0, collaboratore.roundConsecutiviMotivazioneBassa - 1);
     }
+    // Soglia di trascuratezza specifica per cluster: un performer tollera piu' settimane senza
+    // contatto diretto prima che pesi come rischio (coerente con "delega quanto piu' possibile"),
+    // potenziale e resistente restano piu' esigenti perche' hanno bisogno di continuita'.
+    const sogliaTrascuratezza = (collaboratoriConfig.clusterDefinitions[collaboratore.cluster] || {}).sogliaTrascuratezza
+      || azioniConfig.rondeConsecutiveTrascuratoPerRischio;
+
     let deltaRischio = 0;
     if (collaboratore.roundConsecutiviMotivazioneBassa >= collaboratoriConfig.rondeConsecutiveMotivazioneBassaPerTurnover) {
       deltaRischio += 10;
     }
-    if (collaboratore.roundConsecutiviTrascurato >= azioniConfig.rondeConsecutiveTrascuratoPerRischio) {
+    if (collaboratore.roundConsecutiviTrascurato >= sogliaTrascuratezza) {
       deltaRischio += 10;
     }
     if (deltaRischio === 0) deltaRischio = -5;
@@ -362,8 +372,10 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
       if (regolaAbbandono) {
         const cond = regolaAbbandono.condizioni;
         const azioneNonNessunIntervento = azioneId !== 'nessunIntervento';
+        // Stessa soglia per cluster usata sopra per il rischio turnover, cosi' un performer
+        // trascurato non "abbandona" prima del tempo rispetto a quanto tollera il suo profilo.
         if (
-          trascuratoPrimaDiQuestoRound >= cond.roundConsecutiviTrascuratoMin &&
+          trascuratoPrimaDiQuestoRound >= sogliaTrascuratezza &&
           azioneNonNessunIntervento === cond.azioneQuestoRoundDiversaDaNessunIntervento
         ) {
           messaggiNarrativi.push({
@@ -375,6 +387,30 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
             collaboratore.uscitoDallaRete = true;
           }
         }
+      }
+    }
+
+    // 5c) riclassificazione dinamica (es. potenziale -> performer se ben gestito nel tempo):
+    // richiede che le soglie siano mantenute per piu' chiusure di round consecutive, non solo
+    // toccate una volta, per evitare che un singolo picco cambi le regole sotto al tavolo.
+    // Sempre segnalata con un messaggio esplicito, mai silenziosa.
+    const regolaRiclassificazione = collaboratoriConfig.riclassificazione;
+    if (regolaRiclassificazione && collaboratore.cluster === regolaRiclassificazione.da) {
+      const soddisfaSoglie =
+        collaboratore.stats.competenza >= regolaRiclassificazione.competenzaMin &&
+        collaboratore.stats.autonomia >= regolaRiclassificazione.autonomiaMin;
+      collaboratore.roundConsecutiviSogliaRiclassificazione = soddisfaSoglie
+        ? (collaboratore.roundConsecutiviSogliaRiclassificazione || 0) + 1
+        : 0;
+      if (collaboratore.roundConsecutiviSogliaRiclassificazione >= regolaRiclassificazione.roundConsecutiviRichiesti) {
+        collaboratore.clusterOriginale = collaboratore.clusterOriginale || collaboratore.cluster;
+        collaboratore.cluster = regolaRiclassificazione.a;
+        collaboratore.riclassificatoAlRound = roundNumero;
+        messaggiNarrativi.push({
+          tipo: 'riclassificazione',
+          collaboratoreId: collaboratore.id,
+          testo: `${collaboratore.nome} è cresciuto/a: da ora lavora con l'autonomia e i ritmi di un performer, con meno bisogno del vostro intervento diretto.`
+        });
       }
     }
 
