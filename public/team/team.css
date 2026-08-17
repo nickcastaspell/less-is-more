@@ -250,6 +250,14 @@
 
 .tag-in-agenda { display: inline-block; margin-top: 6px; font-size: 0.66rem; color: var(--green-ok); border: 1px solid var(--green-ok); border-radius: 10px; padding: 2px 8px; }
 
+.riepilogo-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.riepilogo-header h3 { margin: 0; color: var(--gold-300); }
+.riepilogo-parola-badge {
+  display: inline-block; background: var(--gold-400); color: var(--navy-950); font-weight: 700;
+  font-size: 0.72rem; letter-spacing: 0.4px; border-radius: 12px; padding: 4px 12px; white-space: nowrap;
+}
+.riepilogo-narrativa { font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin: 0 0 16px; }
+
 /* ---------- Fase 3: la crisi cambia il "mood" di tutta la scrivania ---------- */
 body { transition: background 0.6s ease; }
 body.crisi-attiva { background: #1c140d; }

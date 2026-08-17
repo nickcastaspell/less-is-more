@@ -82,6 +82,7 @@ function nuovoTavolo(id, nome, codiceAccesso, collaboratoriConfig, gameConfig) {
     climaTeam: 70,
     log: [], // { round, collaboratoreId, azioneId, costoOre, cluster }
     punteggiPerRound: [],
+    riepilogoSettimanaChiusa: null, // ultimo riepilogo per la schermata di attesa lato tavolo (vedi calcolaRiepilogoSettimanaChiusa)
     metriche: {
       oreTotaliPerCollaboratore: {},
       oreTotali: 0,
@@ -538,6 +539,9 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
   const motivazioneSquadra = calcolaMotivazioneSquadra(tavolo);
   const coerenzaManageriale = calcolaCoerenzaManageriale(tavolo);
   const efficienzaGruppo = calcolaEfficienzaGruppo(performanceRete, crescitaNormalizzata, tavolo.climaTeam);
+  const puntoRoundPrecedente = tavolo.punteggiPerRound.length > 0
+    ? tavolo.punteggiPerRound[tavolo.punteggiPerRound.length - 1]
+    : null;
 
   tavolo.punteggiPerRound.push({
     round: roundNumero,
@@ -553,6 +557,16 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
     oreUsate: tavolo.oreUsateRound
   });
 
+  // riepilogo mostrato al tavolo nella schermata di attesa (sostituisce la rotella di caricamento)
+  tavolo.riepilogoSettimanaChiusa = calcolaRiepilogoSettimanaChiusa(
+    tavolo,
+    roundNumero,
+    azioniConfig,
+    messaggiNarrativiConfig.recapSettimana,
+    Math.round(efficienzaGruppo),
+    puntoRoundPrecedente ? puntoRoundPrecedente.efficienzaGruppo : null
+  );
+
   // reset per il round successivo
   tavolo.azioniSottomesseRound = {};
   tavolo.oreUsateRound = 0;
@@ -562,6 +576,66 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
 function media(arr) {
   if (!arr.length) return 0;
   return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+// Riepilogo mostrato al tavolo nella schermata di attesa dopo la chiusura di una settimana, al
+// posto della rotella di caricamento: elenco delle azioni reali fatte quella settimana + un
+// messaggio narrativo volutamente ambiguo (non un giudizio numerico) su come si sta muovendo il
+// team, con una parola di sintesi. Se il tavolo non ha fatto nulla lo dice, citando il
+// collaboratore piu' a rischio; altrimenti cita chi ha ricevuto piu' tempo quella settimana.
+function calcolaRiepilogoSettimanaChiusa(tavolo, roundNumero, azioniConfig, recapConfig, efficienzaGruppo, efficienzaGruppoPrecedente) {
+  if (!recapConfig) return null;
+
+  const vociRound = tavolo.log.filter((v) => v.round === roundNumero);
+  const azioniReali = vociRound.filter((v) => v.azioneId !== 'nessunIntervento');
+
+  const azioni = azioniReali.map((v) => {
+    const collaboratore = tavolo.collaboratori.find((c) => c.id === v.collaboratoreId);
+    const azione = azioniConfig.azioni[v.azioneId];
+    return { nome: collaboratore ? collaboratore.nome : '—', azioneLabel: azione ? azione.label : v.azioneId };
+  });
+
+  if (azioniReali.length === 0) {
+    const attivi = tavolo.collaboratori.filter((c) => !c.uscitoDallaRete);
+    const pool = attivi.length > 0 ? attivi : tavolo.collaboratori;
+    const citato = pool.reduce((min, c) => (!min || c.stats.motivazione < min.stats.motivazione ? c : min), null);
+    const lista = recapConfig.nessunaAzione;
+    const tpl = lista[roundNumero % lista.length];
+    return {
+      round: roundNumero,
+      testo: tpl.template.replace('{nome}', citato ? citato.nome : 'il team'),
+      parola: tpl.parola,
+      azioni: []
+    };
+  }
+
+  let migliore = azioniReali[0];
+  for (const v of azioniReali) {
+    if (v.costoOre > migliore.costoOre) migliore = v;
+  }
+  const collaboratoreCitato = tavolo.collaboratori.find((c) => c.id === migliore.collaboratoreId);
+  const nomeCitato = collaboratoreCitato ? collaboratoreCitato.nome : 'il team';
+
+  let livello = 'medio';
+  if (efficienzaGruppo >= recapConfig.sogliaLivelloAlto) livello = 'alto';
+  else if (efficienzaGruppo <= recapConfig.sogliaLivelloBasso) livello = 'basso';
+
+  let tendenza = 'stabile';
+  if (efficienzaGruppoPrecedente !== null && efficienzaGruppoPrecedente !== undefined) {
+    const delta = efficienzaGruppo - efficienzaGruppoPrecedente;
+    if (delta >= recapConfig.sogliaTendenzaSalita) tendenza = 'salita';
+    else if (delta <= recapConfig.sogliaTendenzaCalo) tendenza = 'calo';
+  }
+
+  const lista = recapConfig.griglia[livello][tendenza];
+  const tpl = lista[roundNumero % lista.length];
+
+  return {
+    round: roundNumero,
+    testo: tpl.template.replace('{nome}', nomeCitato),
+    parola: tpl.parola,
+    azioni
+  };
 }
 
 // ---------- Metriche derivate condivise tra chiudiRound (storico per round, usato dal grafico
