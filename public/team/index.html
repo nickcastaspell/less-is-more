@@ -60,7 +60,17 @@
       <div class="card centro">
         <h2 id="titoloAttesa">In attesa che il facilitatore avvii la settimana</h2>
         <p class="muted">Settimana <span id="roundAttesaCorrente">1</span> / <span id="roundAttesaTotale">5</span></p>
-        <div class="spinner"></div>
+        <div id="spinnerAttesa" class="spinner"></div>
+      </div>
+
+      <div id="cardRiepilogoAttesa" class="card hidden">
+        <div class="riepilogo-header">
+          <h3>Come è andata la settimana</h3>
+          <span id="riepilogoParola" class="riepilogo-parola-badge">—</span>
+        </div>
+        <p id="riepilogoNarrativa" class="riepilogo-narrativa"></p>
+        <div class="agenda-lista-titolo muted">Azioni fatte questa settimana</div>
+        <div id="riepilogoListaAzioni"></div>
       </div>
     </section>
 
@@ -139,6 +149,8 @@
         </div>
         <div class="agenda-lista-titolo muted">Azioni pianificate questa settimana</div>
         <div id="agendaListaAzioni"></div>
+        <div class="agenda-lista-titolo muted" style="margin-top:18px;">Storico azioni sui collaboratori</div>
+        <div id="agendaStorico"></div>
       </div>
 
       <div class="card conferma-box">

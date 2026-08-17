@@ -303,6 +303,32 @@ function renderAttesa(vista) {
     ? `Settimana ${vista.roundCorrente - 1} chiusa — in attesa della prossima settimana`
     : 'In attesa che il facilitatore avvii la settimana';
 
+  // Al posto della rotella: se una settimana e' appena stata chiusa, mostriamo il riepilogo
+  // (azioni fatte + messaggio narrativo ambiguo + parola di sintesi) calcolato dal motore.
+  // Prima della Settimana 1 non c'e' ancora nulla da riepilogare: resta la rotella.
+  const cardRiepilogo = el('cardRiepilogoAttesa');
+  const spinner = el('spinnerAttesa');
+  if (vista.statoSessione === 'round_chiuso' && vista.riepilogoSettimanaChiusa) {
+    spinner.classList.add('hidden');
+    cardRiepilogo.classList.remove('hidden');
+    const r = vista.riepilogoSettimanaChiusa;
+    el('riepilogoParola').textContent = r.parola;
+    el('riepilogoNarrativa').textContent = r.testo;
+    const box = el('riepilogoListaAzioni');
+    if (!r.azioni || r.azioni.length === 0) {
+      box.innerHTML = '<div class="agenda-vuota">Nessuna azione registrata questa settimana.</div>';
+    } else {
+      box.innerHTML = r.azioni.map((a) => `
+        <div class="agenda-azione-riga">
+          <div><span class="chi">${a.nome}</span> — <span class="cosa">${a.azioneLabel}</span></div>
+        </div>
+      `).join('');
+    }
+  } else {
+    spinner.classList.remove('hidden');
+    cardRiepilogo.classList.add('hidden');
+  }
+
   const cardMessaggi = el('cardMessaggiAttesa');
   if ((vista.messaggiNarrativiRound || []).length > 0) {
     cardMessaggi.innerHTML = vista.messaggiNarrativiRound.map((m) => `<p>${m.testo}</p>`).join('');
@@ -599,14 +625,37 @@ function renderAgenda(vista) {
   const box = el('agendaListaAzioni');
   if (righe.length === 0) {
     box.innerHTML = '<div class="agenda-vuota">Ancora nessuna azione pianificata per questa settimana: apri il Telefono per rispondere alle richieste.</div>';
-    return;
+  } else {
+    box.innerHTML = righe.map((r) => `
+      <div class="agenda-azione-riga">
+        <div><span class="chi">${r.chi}</span> — <span class="cosa">${r.cosa}</span></div>
+        <div>${r.ore}h</div>
+      </div>
+    `).join('');
   }
-  box.innerHTML = righe.map((r) => `
-    <div class="agenda-azione-riga">
-      <div><span class="chi">${r.chi}</span> — <span class="cosa">${r.cosa}</span></div>
-      <div>${r.ore}h</div>
-    </div>
-  `).join('');
+
+  // Storico: tutte le azioni reali (non "nessun intervento") delle settimane gia' chiuse, per
+  // dare corpo alla scheda e permettere di ripercorrere cosa e' stato fatto finora.
+  const storico = [];
+  vista.collaboratori.forEach((c) => {
+    (c.cronologia || []).forEach((v) => {
+      if (v.round < vista.roundCorrente && v.azioneId !== 'nessunIntervento') {
+        storico.push({ round: v.round, nome: c.nome, azioneLabel: v.azioneLabel });
+      }
+    });
+  });
+  storico.sort((a, b) => b.round - a.round || a.nome.localeCompare(b.nome));
+
+  const boxStorico = el('agendaStorico');
+  if (storico.length === 0) {
+    boxStorico.innerHTML = '<div class="agenda-vuota">Ancora nessuna azione nelle settimane passate.</div>';
+  } else {
+    boxStorico.innerHTML = storico.map((r) => `
+      <div class="agenda-azione-riga">
+        <div><span class="chi">Settimana ${r.round}</span> — <span class="cosa">${r.nome}: ${r.azioneLabel}</span></div>
+      </div>
+    `).join('');
+  }
 }
 
 function aggiornaTimerTeam(vista) {
