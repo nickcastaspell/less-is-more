@@ -99,6 +99,7 @@ function vistaTavoloPerTeam(tavolo, sessione) {
     storicoPunteggi: tavolo.punteggiPerRound,
     storicoRichieste: tavolo.storicoRichieste,
     messaggiNarrativiRound: tavolo.messaggiNarrativiRound,
+    riepilogoSettimanaChiusa: tavolo.riepilogoSettimanaChiusa,
     impattoCrisi: tavolo.impattoCrisi,
     statoSessione: sessione.stato,
     roundCorrente: sessione.roundCorrente,
@@ -134,6 +135,7 @@ function vistaTavoloPerFacilitatore(tavolo) {
     storicoPunteggi: tavolo.punteggiPerRound,
     storicoRichieste: tavolo.storicoRichieste,
     messaggiNarrativiRound: tavolo.messaggiNarrativiRound,
+    riepilogoSettimanaChiusa: tavolo.riepilogoSettimanaChiusa,
     impattoCrisi: tavolo.impattoCrisi,
     azioniSistemicheLog: tavolo.azioniSistemicheLog,
     log: tavolo.log
