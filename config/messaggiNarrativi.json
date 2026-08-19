@@ -19,5 +19,61 @@
     "template": "{nome}: l'hai trascurato/a troppe volte. Oggi, proprio mentre lo cerchi, ti comunica che sta valutando altre offerte.",
     "effetto": "escePotenzialmenteDallaRete"
   },
-  "azioniAffiancamento": ["shadowing", "coaching", "surroga"]
+  "azioniAffiancamento": ["shadowing", "coaching", "surroga"],
+  "recapSettimana": {
+    "_note": "Riepilogo mostrato al tavolo nella schermata di attesa dopo la chiusura di ogni settimana, al posto della rotella di caricamento. Volutamente ambiguo, non un giudizio numerico: 'livello' e 'tendenza' derivano da efficienzaGruppo del round appena chiuso vs quello precedente. Se ci sono azioni reali (diverse da nessunIntervento) si cita il collaboratore su cui e' stato investito piu' tempo; se non ce ne sono, si cita il collaboratore piu' a rischio (motivazione piu' bassa). La scelta del template dentro ogni lista e' round % lunghezza lista, per variare senza bisogno di uno stato random dedicato.",
+    "sogliaLivelloAlto": 68,
+    "sogliaLivelloBasso": 45,
+    "sogliaTendenzaSalita": 4,
+    "sogliaTendenzaCalo": -4,
+    "nessunaAzione": [
+      { "template": "Questa settimana non risulta nessun intervento da parte vostra. Il gruppo ha continuato a muoversi con le proprie forze — {nome} compreso/a — ma senza alcun segnale che qualcuno stesse guardando.", "parola": "Distanza" },
+      { "template": "Nessuna decisione registrata questa settimana. La rete ha tenuto botta da sola: {nome} in particolare sembra essersene accorto/a.", "parola": "Silenzio" },
+      { "template": "Una settimana senza alcun intervento. Il gruppo ha fatto quello che poteva senza input da parte vostra — {nome} su tutti.", "parola": "Assenza" }
+    ],
+    "griglia": {
+      "alto": {
+        "salita": [
+          { "template": "Avete investito bene il tempo questa settimana: {nome} sembra particolarmente soddisfatto/a, e il team nel suo insieme sembra progredire.", "parola": "Crescita" },
+          { "template": "Le scelte di questa settimana sembrano aver toccato il punto giusto: {nome} risponde bene, e la squadra sembra prendere slancio.", "parola": "Slancio" }
+        ],
+        "stabile": [
+          { "template": "Il gruppo si muove con un ritmo solido: {nome} risponde bene alle vostre scelte, e la squadra tiene la rotta senza scosse.", "parola": "Solidità" },
+          { "template": "Una settimana lineare: {nome} sembra a proprio agio, e il resto del team procede senza intoppi particolari.", "parola": "Equilibrio" }
+        ],
+        "calo": [
+          { "template": "Buoni segnali da {nome}, che ha risposto bene alle vostre scelte — ma il clima generale del team sembra un po' meno disteso rispetto a prima.", "parola": "Attenzione" },
+          { "template": "{nome} tiene bene, ma qualcosa nel resto del gruppo inizia a scricchiolare: vale la pena tenerlo d'occhio.", "parola": "Crepe" }
+        ]
+      },
+      "medio": {
+        "salita": [
+          { "template": "Le cose si muovono nella direzione giusta: {nome} sembra rispondere bene, e il team sembra prendere lentamente slancio.", "parola": "Ripresa" },
+          { "template": "Piccoli passi avanti questa settimana: {nome} ha reagito bene, e si intravede un miglioramento nel gruppo.", "parola": "Schiarita" }
+        ],
+        "stabile": [
+          { "template": "Una settimana nella norma: {nome} ha risposto come previsto, il gruppo procede senza scosse particolari.", "parola": "Stabilità" },
+          { "template": "Niente di eclatante: {nome} tiene il proprio ritmo, e il team resta sostanzialmente dove si trovava.", "parola": "Routine" }
+        ],
+        "calo": [
+          { "template": "Qualche crepa comincia a farsi vedere: {nome} sembra reggere, ma il clima generale del team appare un po' più incerto.", "parola": "Incertezza" },
+          { "template": "{nome} ha risposto alle vostre scelte, ma il resto del gruppo sembra un po' meno coinvolto rispetto a prima.", "parola": "Rallentamento" }
+        ]
+      },
+      "basso": {
+        "salita": [
+          { "template": "Segnali piccoli ma reali: {nome} sembra reagire bene alle vostre scelte, e forse è l'inizio di qualcosa — ma è ancora presto per dirlo.", "parola": "Timido segnale" },
+          { "template": "Non è ancora una svolta, ma {nome} sembra aver apprezzato l'attenzione ricevuta: un primo passo, nel gruppo si respira qualcosa di diverso.", "parola": "Primo passo" }
+        ],
+        "stabile": [
+          { "template": "Il team fatica a ingranare: {nome} tiene botta, ma nel complesso il gruppo sembra fermo in un equilibrio precario.", "parola": "Stallo" },
+          { "template": "{nome} resta un punto fermo, ma il resto della squadra sembra faticare a trovare slancio.", "parola": "Fatica" }
+        ],
+        "calo": [
+          { "template": "Le cose non stanno andando come sperato: {nome} sembra risentirne più degli altri, e il clima del team continua a peggiorare.", "parola": "Affanno" },
+          { "template": "Settimana difficile: {nome} in particolare sembra sotto pressione, e il gruppo nel suo insieme non sembra trovare terreno solido.", "parola": "Tensione" }
+        ]
+      }
+    }
+  }
 }
