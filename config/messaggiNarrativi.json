@@ -21,57 +21,138 @@
   },
   "azioniAffiancamento": ["shadowing", "coaching", "surroga"],
   "recapSettimana": {
-    "_note": "Riepilogo mostrato al tavolo nella schermata di attesa dopo la chiusura di ogni settimana, al posto della rotella di caricamento. Volutamente ambiguo, non un giudizio numerico: 'livello' e 'tendenza' derivano da efficienzaGruppo del round appena chiuso vs quello precedente. Se ci sono azioni reali (diverse da nessunIntervento) si cita il collaboratore su cui e' stato investito piu' tempo; se non ce ne sono, si cita il collaboratore piu' a rischio (motivazione piu' bassa). La scelta del template dentro ogni lista e' round % lunghezza lista, per variare senza bisogno di uno stato random dedicato.",
+    "_note": "Riepilogo mostrato al tavolo nella schermata di attesa dopo la chiusura di ogni settimana, al posto della rotella di caricamento. Priorita' 1: se questo round e' successo un evento singolo (abbandono/dipendenza/riclassificazione/prima azione sistemica/chiusura della crisi), si racconta quello (eventiSpeciali), non il generico. Priorita' 2: se il tavolo non ha fatto nessuna azione reale, nessunaAzione. Altrimenti: griglia livello (da efficienzaGruppo) x tendenza (da efficienzaGruppo vs round precedente, 5 fasce), con citazione a rotazione (citazioniStrategie) tra chi ha ricevuto piu' tempo, chi e' migliorato di piu' e chi e' trascurato da piu' tempo. In Fase 4, se il tavolo ha fatto al massimo un intervento individuale, si aggiunge una nota di maturita' (faseMaturita4). Ogni lista di varianti viene pescata come un mazzo di carte senza ripetizioni fino a esaurimento (vedi pescaVariante in gameEngine.js), non piu' round%lunghezza: con poche varianti a disposizione bastava una manciata di round per sentire la ripetizione.",
     "sogliaLivelloAlto": 68,
     "sogliaLivelloBasso": 45,
-    "sogliaTendenzaSalita": 4,
-    "sogliaTendenzaCalo": -4,
+    "sogliaTendenzaSalitaForte": 8,
+    "sogliaTendenzaSalita": 3,
+    "sogliaTendenzaCaloForte": -8,
+    "sogliaTendenzaCalo": -3,
+    "citazioniStrategie": ["investito", "migliorato", "trascurato"],
     "nessunaAzione": [
       { "template": "Questa settimana non risulta nessun intervento da parte vostra. Il gruppo ha continuato a muoversi con le proprie forze — {nome} compreso/a — ma senza alcun segnale che qualcuno stesse guardando.", "parola": "Distanza" },
       { "template": "Nessuna decisione registrata questa settimana. La rete ha tenuto botta da sola: {nome} in particolare sembra essersene accorto/a.", "parola": "Silenzio" },
-      { "template": "Una settimana senza alcun intervento. Il gruppo ha fatto quello che poteva senza input da parte vostra — {nome} su tutti.", "parola": "Assenza" }
+      { "template": "Una settimana senza alcun intervento. Il gruppo ha fatto quello che poteva senza input da parte vostra — {nome} su tutti.", "parola": "Assenza" },
+      { "template": "Il telefono non ha squillato verso di voi questa settimana. {nome} in particolare avrebbe forse gradito un segnale.", "parola": "Vuoto" }
+    ],
+    "eventiSpeciali": {
+      "_note": "Sostituiscono il messaggio generico quando accadono. Priorita': abbandono > dipendenza > riclassificazione > primaAzioneSistemica > crisiChiusa.",
+      "abbandono": [
+        { "template": "Questa settimana avete perso {nome}: le prime avvisaglie c'erano da tempo, ma la risposta e' arrivata quando ormai era tardi per rimediare.", "parola": "Perdita" },
+        { "template": "{nome} ha lasciato la rete questa settimana. E' il costo piu' alto di una trascuratezza durata troppo.", "parola": "Congedo" }
+      ],
+      "dipendenza": [
+        { "template": "Avete continuato a seguire da vicino {nome} anche oltre il bisogno: rischiate di aver costruito una dipendenza dove non serviva piu'.", "parola": "Sovraccarico" },
+        { "template": "{nome} ormai saprebbe cavarsela da solo/a, ma continua a cercarvi. Segno che lo/la state ancora seguendo piu' del necessario.", "parola": "Trattenuto" }
+      ],
+      "riclassificazione": [
+        { "template": "Questa e' la settimana in cui si e' vista la differenza: {nome} lavora ormai con l'autonomia e i ritmi di un performer.", "parola": "Svolta" },
+        { "template": "{nome} ha fatto un salto di qualita' netto: meno bisogno di voi, piu' risultati da solo/a.", "parola": "Decollo" }
+      ],
+      "primaAzioneSistemica": [
+        { "template": "Da questa settimana qualcosa cambia: avete iniziato ad agire sul sistema invece che rincorrere le singole persone.", "parola": "Maturità" },
+        { "template": "Prima azione sul sistema nel suo insieme: un segnale che la squadra puo' iniziare a reggersi anche senza di voi su ogni singolo caso.", "parola": "Passaggio" }
+      ],
+      "crisiChiusa": {
+        "buona": [
+          { "template": "La crisi ha messo alla prova la squadra, e ha retto: si vede il lavoro fatto nelle settimane precedenti.", "parola": "Tenuta" },
+          { "template": "Nel momento difficile la rete che avevate costruito ha risposto presente.", "parola": "Solidità" }
+        ],
+        "mista": [
+          { "template": "La crisi ha messo in luce sia i punti solidi della squadra sia quelli piu' fragili.", "parola": "Prova" },
+          { "template": "Non tutti hanno retto alla stessa maniera questa settimana: la crisi ha fatto emergere qualche differenza nel gruppo.", "parola": "Differenze" }
+        ],
+        "scarsa": [
+          { "template": "La crisi ha colto la squadra piuttosto impreparata: molte richieste sono rimaste senza risposta.", "parola": "Scoperti" },
+          { "template": "Settimana dura: la rete ha dovuto reggersi quasi da sola nel momento di maggiore pressione.", "parola": "Pressione" }
+        ]
+      }
+    },
+    "faseMaturita4": [
+      " In Fase 4 si vede: state lasciando sempre più spazio ai singoli, e la rete sembra reggersi da sola.",
+      " Il fatto che questa settimana siate intervenuti così poco sui singoli, in questa fase, è probabilmente un buon segno.",
+      " State smettendo di microgestire proprio quando la squadra è pronta per questo: si nota."
     ],
     "griglia": {
       "alto": {
+        "salitaForte": [
+          { "template": "Settimana da ricordare: {nome} ha risposto benissimo, e l'intera squadra sta salendo con decisione.", "parola": "Exploit" },
+          { "template": "Rispetto alle ultime settimane il passo è cambiato: {nome} in testa, ma il miglioramento si vede su tutta la linea.", "parola": "Accelerazione" },
+          { "template": "Numeri in netta crescita, senza segnali di affanno da nessuna parte del gruppo.", "parola": "Slancio" }
+        ],
         "salita": [
           { "template": "Avete investito bene il tempo questa settimana: {nome} sembra particolarmente soddisfatto/a, e il team nel suo insieme sembra progredire.", "parola": "Crescita" },
-          { "template": "Le scelte di questa settimana sembrano aver toccato il punto giusto: {nome} risponde bene, e la squadra sembra prendere slancio.", "parola": "Slancio" }
+          { "template": "Rispetto a qualche settimana fa il gruppo si muove meglio, {nome} su tutti.", "parola": "Miglioramento" },
+          { "template": "Piccoli ma solidi passi avanti su più fronti questa settimana.", "parola": "Progresso" }
         ],
         "stabile": [
           { "template": "Il gruppo si muove con un ritmo solido: {nome} risponde bene alle vostre scelte, e la squadra tiene la rotta senza scosse.", "parola": "Solidità" },
-          { "template": "Una settimana lineare: {nome} sembra a proprio agio, e il resto del team procede senza intoppi particolari.", "parola": "Equilibrio" }
+          { "template": "Rispetto alle settimane scorse non è cambiato molto, ma il livello resta alto.", "parola": "Continuità" },
+          { "template": "Una settimana lineare, senza sussulti: il gruppo tiene quota.", "parola": "Equilibrio" }
         ],
         "calo": [
           { "template": "Buoni segnali da {nome}, che ha risposto bene alle vostre scelte — ma il clima generale del team sembra un po' meno disteso rispetto a prima.", "parola": "Attenzione" },
+          { "template": "Rispetto a qualche settimana fa si avverte un piccolo rallentamento, anche se il livello resta comunque buono.", "parola": "Frenata" },
           { "template": "{nome} tiene bene, ma qualcosa nel resto del gruppo inizia a scricchiolare: vale la pena tenerlo d'occhio.", "parola": "Crepe" }
+        ],
+        "caloForte": [
+          { "template": "Un brusco cambio di passo rispetto alle ultime settimane: {nome} regge, ma il resto della squadra sembra aver perso lo slancio che aveva.", "parola": "Scossone" },
+          { "template": "Da un livello alto si è scesi in fretta: vale la pena capire cosa è cambiato.", "parola": "Campanello" },
+          { "template": "Il gruppo che fino a poco fa andava bene ora mostra segnali di stanchezza diffusa.", "parola": "Stanchezza" }
         ]
       },
       "medio": {
+        "salitaForte": [
+          { "template": "Le cose si muovono nella direzione giusta, e in fretta: {nome} sembra rispondere molto bene, e si sente un cambio di marcia nel gruppo.", "parola": "Ripartenza" },
+          { "template": "Rispetto alle ultime settimane il miglioramento è netto, non solo su {nome}.", "parola": "Recupero" },
+          { "template": "Il gruppo sta chiaramente uscendo da una fase difficile.", "parola": "Risalita" }
+        ],
         "salita": [
           { "template": "Le cose si muovono nella direzione giusta: {nome} sembra rispondere bene, e il team sembra prendere lentamente slancio.", "parola": "Ripresa" },
-          { "template": "Piccoli passi avanti questa settimana: {nome} ha reagito bene, e si intravede un miglioramento nel gruppo.", "parola": "Schiarita" }
+          { "template": "Piccoli passi avanti questa settimana: {nome} ha reagito bene, e si intravede un miglioramento nel gruppo.", "parola": "Schiarita" },
+          { "template": "Qualcosa si sta muovendo, anche se piano.", "parola": "Segnali" }
         ],
         "stabile": [
           { "template": "Una settimana nella norma: {nome} ha risposto come previsto, il gruppo procede senza scosse particolari.", "parola": "Stabilità" },
-          { "template": "Niente di eclatante: {nome} tiene il proprio ritmo, e il team resta sostanzialmente dove si trovava.", "parola": "Routine" }
+          { "template": "Rispetto alle ultime settimane non cambia molto: il gruppo resta dove si trovava.", "parola": "Routine" },
+          { "template": "Niente di eclatante questa settimana, né in bene né in male.", "parola": "Pausa" }
         ],
         "calo": [
           { "template": "Qualche crepa comincia a farsi vedere: {nome} sembra reggere, ma il clima generale del team appare un po' più incerto.", "parola": "Incertezza" },
-          { "template": "{nome} ha risposto alle vostre scelte, ma il resto del gruppo sembra un po' meno coinvolto rispetto a prima.", "parola": "Rallentamento" }
+          { "template": "Rispetto a qualche settimana fa il gruppo sembra meno coinvolto, {nome} a parte.", "parola": "Rallentamento" },
+          { "template": "Si respira un po' di stanchezza nel gruppo questa settimana.", "parola": "Fatica" }
+        ],
+        "caloForte": [
+          { "template": "Un calo netto rispetto alle ultime settimane: {nome} sembra reggere meglio degli altri, ma la squadra nel complesso fatica.", "parola": "Difficoltà" },
+          { "template": "Qualcosa si è rotto rispetto a prima: vale la pena guardare più da vicino cosa sta succedendo nel gruppo.", "parola": "Frattura" },
+          { "template": "Il gruppo sembra aver perso terreno in fretta questa settimana.", "parola": "Arretramento" }
         ]
       },
       "basso": {
+        "salitaForte": [
+          { "template": "Non è ancora una svolta, ma qualcosa di importante si è mosso: {nome} ha risposto molto bene, e forse è l'inizio di una ripresa vera.", "parola": "Apertura" },
+          { "template": "Rispetto a una situazione difficile, questa settimana segna un cambio di rotta netto.", "parola": "Inversione" },
+          { "template": "Dopo settimane complicate, finalmente un segnale forte in positivo.", "parola": "Respiro" }
+        ],
         "salita": [
           { "template": "Segnali piccoli ma reali: {nome} sembra reagire bene alle vostre scelte, e forse è l'inizio di qualcosa — ma è ancora presto per dirlo.", "parola": "Timido segnale" },
-          { "template": "Non è ancora una svolta, ma {nome} sembra aver apprezzato l'attenzione ricevuta: un primo passo, nel gruppo si respira qualcosa di diverso.", "parola": "Primo passo" }
+          { "template": "Non è ancora una svolta, ma {nome} sembra aver apprezzato l'attenzione ricevuta: un primo passo.", "parola": "Primo passo" },
+          { "template": "Qualcosa di piccolo si muove, in una situazione che finora non si muoveva.", "parola": "Spiraglio" }
         ],
         "stabile": [
           { "template": "Il team fatica a ingranare: {nome} tiene botta, ma nel complesso il gruppo sembra fermo in un equilibrio precario.", "parola": "Stallo" },
+          { "template": "Rispetto alle ultime settimane la situazione non cambia: il gruppo resta in difficoltà.", "parola": "Impasse" },
           { "template": "{nome} resta un punto fermo, ma il resto della squadra sembra faticare a trovare slancio.", "parola": "Fatica" }
         ],
         "calo": [
           { "template": "Le cose non stanno andando come sperato: {nome} sembra risentirne più degli altri, e il clima del team continua a peggiorare.", "parola": "Affanno" },
+          { "template": "Rispetto a una situazione già difficile, questa settimana è andata peggio.", "parola": "Peggioramento" },
           { "template": "Settimana difficile: {nome} in particolare sembra sotto pressione, e il gruppo nel suo insieme non sembra trovare terreno solido.", "parola": "Tensione" }
+        ],
+        "caloForte": [
+          { "template": "Una settimana pesante: {nome} sembra il più colpito, e la situazione generale del gruppo si è aggravata parecchio.", "parola": "Emergenza" },
+          { "template": "Rispetto a una situazione già critica, il gruppo è arretrato ancora.", "parola": "Crisi" },
+          { "template": "Il gruppo mostra segnali seri di sofferenza diffusa questa settimana.", "parola": "Allarme" }
         ]
       }
     }

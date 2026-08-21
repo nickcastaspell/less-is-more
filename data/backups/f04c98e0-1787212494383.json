@@ -1,0 +1,384 @@
+{
+  "id": "f04c98e0",
+  "nome": "Test Strumenti",
+  "stato": "in_round",
+  "roundCorrente": 1,
+  "numeroRound": 9,
+  "gameConfig": {
+    "_note": "numeroRound e' calcolato automaticamente alla creazione sessione come fasi.numeroRoundFase2 + fasi.numeroRoundFase3 + fasi.numeroRoundFase4 (vedi sessionManager). Le fasi 3 sono sempre round di crisi con parametri fissi in fasi.crisi.",
+    "numeroRound": 9,
+    "fasi": {
+      "numeroRoundFase2": 5,
+      "numeroRoundFase3": 1,
+      "numeroRoundFase4": 3,
+      "finestraTurnoSilenzioso": [
+        2,
+        4
+      ],
+      "crisi": {
+        "titolo": "Crisi: nuovo prodotto lanciato in fretta",
+        "testo": "Un nuovo prodotto viene lanciato prima del previsto. Le ore manageriali disponibili si riducono e le richieste dalla rete si moltiplicano: chi avete sviluppato regge, chi avete trascurato fatica.",
+        "moltiplicatoreOre": 0.7,
+        "moltiplicatorePropensione": 2.5,
+        "testoImpattoTemplate": "Durante la crisi sono arrivate {richieste} richieste. Ne avete gestite {gestite}, {nonGestite} sono rimaste senza risposta. {commento}",
+        "commentoSeTutteGestite": "Con le ore ridotte non era scontato: la rete che avevate costruito ha retto.",
+        "commentoSeParzialiGestite": "Avete dovuto scegliere chi seguire e chi no: qualcuno è rimasto scoperto proprio quando serviva di più.",
+        "commentoSeNessunaGestita": "Le richieste sono arrivate più veloci di quanto abbiate potuto rispondere: la rete ha retto da sola, o ha sofferto in silenzio."
+      }
+    },
+    "fase4": {
+      "caloRichiesteSogliaPercentuale": 30,
+      "messaggioCaloRichieste": "Da quando avete iniziato ad agire sul sistema invece che sulle singole persone, le richieste dirette a voi sono diminuite: la rete si sta organizzando da sola."
+    },
+    "oreManagerialiPerRound": 10,
+    "durataRoundSecondi": 300,
+    "_notePesi": "Ribilanciato v11: efficienzaTempo non premia piu' il risparmio ore da solo (era possibile ottenere punteggi alti 'non facendo nulla' o abusando di azioni economiche come surroga/delega senza sviluppare le persone) - ora e' proporzionale anche alla crescita reale ottenuta (vedi calcolaClassificaFinale). motivazioneSquadra e coerenzaManageriale sono due pillar nuovi: prima la motivazione non pesava quasi nulla sul punteggio finale (solo indirettamente dentro 'clima', diluita), e la coerenza delle azioni scelte rispetto al cluster reale non veniva mai punteggiata nonostante fosse gia' tracciata (azioniCoerentiCount).",
+    "pesiClassifica": {
+      "performanceRete": 0.2,
+      "crescitaCollaboratori": 0.2,
+      "efficienzaTempo": 0.15,
+      "autonomiaSquadra": 0.1,
+      "motivazioneSquadra": 0.1,
+      "clima": 0.1,
+      "sostenibilita": 0.1,
+      "coerenzaManageriale": 0.05
+    },
+    "azioniCoerentiPerCluster": {
+      "_note": "Usato per calcolare la metrica coerenzaSituazionale: quota di azioni scelte che il framework indicherebbe come piu' efficaci per quel cluster.",
+      "performer": [
+        "delega",
+        "nessunIntervento",
+        "feedback"
+      ],
+      "potenziale": [
+        "coaching",
+        "feedback",
+        "shadowing"
+      ],
+      "resistente": [
+        "monitoraggio",
+        "surroga",
+        "feedback"
+      ]
+    },
+    "eventiFacilitatore": [
+      {
+        "id": "ev1",
+        "titolo": "Picco di mercato",
+        "testo": "Un cliente strategico chiede una risposta immediata. La settimana in corso costa 2 ore manageriali in piu' di riserva bruciate automaticamente per il team che non ha almeno 2 ore libere.",
+        "tipo": "penalitaOreLibere"
+      },
+      {
+        "id": "ev2",
+        "titolo": "Riorganizzazione improvvisa",
+        "testo": "Un collaboratore Potenziale a scelta del facilitatore riceve -10 motivazione questa settimana.",
+        "tipo": "motivazioneCollaboratore",
+        "delta": -10,
+        "clusterTarget": "potenziale"
+      },
+      {
+        "id": "ev3",
+        "titolo": "Turnover in un tavolo concorrente",
+        "testo": "Solo narrativo: da leggere in aula per stimolare la competizione, nessun effetto sui punteggi.",
+        "tipo": "narrativo"
+      }
+    ],
+    "sogliaTurnoverRischioFinale": 60,
+    "penalitaSostenibilitaPerTurnoverAlto": 15,
+    "penalitaSostenibilitaPerUscito": 20
+  },
+  "tavoli": {
+    "589d45": {
+      "id": "589d45",
+      "nome": "Tavolo 1",
+      "codiceAccesso": "8P69F",
+      "collaboratori": [
+        {
+          "id": "c1",
+          "nome": "Marco Ferrari",
+          "cluster": "performer",
+          "stats": {
+            "competenza": 82,
+            "autonomia": 78,
+            "motivazione": 70,
+            "resilienza": 65,
+            "velocitaApprendimento": 55,
+            "fiducia": 70,
+            "risultati": 75
+          },
+          "statsIniziali": {
+            "competenza": 82,
+            "autonomia": 78,
+            "motivazione": 70,
+            "resilienza": 65,
+            "velocitaApprendimento": 55,
+            "fiducia": 70,
+            "risultati": 75
+          },
+          "rischioTurnover": 0,
+          "roundConsecutiviMotivazioneBassa": 0,
+          "roundConsecutiviTrascurato": 0,
+          "effettiDifferitiPendenti": {},
+          "ultimaAzione": null,
+          "usiConsecutiviSurroga": 0,
+          "categoriaAssegnata": null,
+          "categoriaStorico": [],
+          "propensioneRichiesta": null,
+          "richiestaCorrente": null,
+          "usiConsecutiviAffiancamento": 0,
+          "uscitoDallaRete": false,
+          "roundConsecutiviSogliaRiclassificazione": 0,
+          "clusterOriginale": null,
+          "riclassificatoAlRound": null,
+          "storicoStats": [],
+          "cronologia": []
+        },
+        {
+          "id": "c2",
+          "nome": "Giulia Conti",
+          "cluster": "performer",
+          "stats": {
+            "competenza": 88,
+            "autonomia": 85,
+            "motivazione": 60,
+            "resilienza": 60,
+            "velocitaApprendimento": 50,
+            "fiducia": 65,
+            "risultati": 80
+          },
+          "statsIniziali": {
+            "competenza": 88,
+            "autonomia": 85,
+            "motivazione": 60,
+            "resilienza": 60,
+            "velocitaApprendimento": 50,
+            "fiducia": 65,
+            "risultati": 80
+          },
+          "rischioTurnover": 0,
+          "roundConsecutiviMotivazioneBassa": 0,
+          "roundConsecutiviTrascurato": 0,
+          "effettiDifferitiPendenti": {},
+          "ultimaAzione": null,
+          "usiConsecutiviSurroga": 0,
+          "categoriaAssegnata": null,
+          "categoriaStorico": [],
+          "propensioneRichiesta": null,
+          "richiestaCorrente": null,
+          "usiConsecutiviAffiancamento": 0,
+          "uscitoDallaRete": false,
+          "roundConsecutiviSogliaRiclassificazione": 0,
+          "clusterOriginale": null,
+          "riclassificatoAlRound": null,
+          "storicoStats": [],
+          "cronologia": []
+        },
+        {
+          "id": "c3",
+          "nome": "Sara Bianchi",
+          "cluster": "potenziale",
+          "stats": {
+            "competenza": 40,
+            "autonomia": 35,
+            "motivazione": 88,
+            "resilienza": 70,
+            "velocitaApprendimento": 82,
+            "fiducia": 75,
+            "risultati": 45
+          },
+          "statsIniziali": {
+            "competenza": 40,
+            "autonomia": 35,
+            "motivazione": 88,
+            "resilienza": 70,
+            "velocitaApprendimento": 82,
+            "fiducia": 75,
+            "risultati": 45
+          },
+          "rischioTurnover": 0,
+          "roundConsecutiviMotivazioneBassa": 0,
+          "roundConsecutiviTrascurato": 0,
+          "effettiDifferitiPendenti": {},
+          "ultimaAzione": null,
+          "usiConsecutiviSurroga": 0,
+          "categoriaAssegnata": null,
+          "categoriaStorico": [],
+          "propensioneRichiesta": null,
+          "richiestaCorrente": null,
+          "usiConsecutiviAffiancamento": 0,
+          "uscitoDallaRete": false,
+          "roundConsecutiviSogliaRiclassificazione": 0,
+          "clusterOriginale": null,
+          "riclassificatoAlRound": null,
+          "storicoStats": [],
+          "cronologia": []
+        },
+        {
+          "id": "c4",
+          "nome": "Luca Romano",
+          "cluster": "potenziale",
+          "stats": {
+            "competenza": 45,
+            "autonomia": 40,
+            "motivazione": 80,
+            "resilienza": 60,
+            "velocitaApprendimento": 75,
+            "fiducia": 68,
+            "risultati": 48
+          },
+          "statsIniziali": {
+            "competenza": 45,
+            "autonomia": 40,
+            "motivazione": 80,
+            "resilienza": 60,
+            "velocitaApprendimento": 75,
+            "fiducia": 68,
+            "risultati": 48
+          },
+          "rischioTurnover": 0,
+          "roundConsecutiviMotivazioneBassa": 0,
+          "roundConsecutiviTrascurato": 0,
+          "effettiDifferitiPendenti": {},
+          "ultimaAzione": null,
+          "usiConsecutiviSurroga": 0,
+          "categoriaAssegnata": null,
+          "categoriaStorico": [],
+          "propensioneRichiesta": null,
+          "richiestaCorrente": null,
+          "usiConsecutiviAffiancamento": 0,
+          "uscitoDallaRete": false,
+          "roundConsecutiviSogliaRiclassificazione": 0,
+          "clusterOriginale": null,
+          "riclassificatoAlRound": null,
+          "storicoStats": [],
+          "cronologia": []
+        },
+        {
+          "id": "c5",
+          "nome": "Paolo Greco",
+          "cluster": "resistente",
+          "stats": {
+            "competenza": 60,
+            "autonomia": 55,
+            "motivazione": 35,
+            "resilienza": 40,
+            "velocitaApprendimento": 30,
+            "fiducia": 40,
+            "risultati": 50
+          },
+          "statsIniziali": {
+            "competenza": 60,
+            "autonomia": 55,
+            "motivazione": 35,
+            "resilienza": 40,
+            "velocitaApprendimento": 30,
+            "fiducia": 40,
+            "risultati": 50
+          },
+          "rischioTurnover": 0,
+          "roundConsecutiviMotivazioneBassa": 0,
+          "roundConsecutiviTrascurato": 0,
+          "effettiDifferitiPendenti": {},
+          "ultimaAzione": null,
+          "usiConsecutiviSurroga": 0,
+          "categoriaAssegnata": null,
+          "categoriaStorico": [],
+          "propensioneRichiesta": null,
+          "richiestaCorrente": {
+            "testo": "Ha perso un cliente"
+          },
+          "usiConsecutiviAffiancamento": 0,
+          "uscitoDallaRete": false,
+          "roundConsecutiviSogliaRiclassificazione": 0,
+          "clusterOriginale": null,
+          "riclassificatoAlRound": null,
+          "storicoStats": [],
+          "cronologia": []
+        },
+        {
+          "id": "c6",
+          "nome": "Elena Rizzo",
+          "cluster": "resistente",
+          "stats": {
+            "competenza": 55,
+            "autonomia": 50,
+            "motivazione": 30,
+            "resilienza": 35,
+            "velocitaApprendimento": 28,
+            "fiducia": 38,
+            "risultati": 47
+          },
+          "statsIniziali": {
+            "competenza": 55,
+            "autonomia": 50,
+            "motivazione": 30,
+            "resilienza": 35,
+            "velocitaApprendimento": 28,
+            "fiducia": 38,
+            "risultati": 47
+          },
+          "rischioTurnover": 0,
+          "roundConsecutiviMotivazioneBassa": 0,
+          "roundConsecutiviTrascurato": 0,
+          "effettiDifferitiPendenti": {},
+          "ultimaAzione": null,
+          "usiConsecutiviSurroga": 0,
+          "categoriaAssegnata": null,
+          "categoriaStorico": [],
+          "propensioneRichiesta": null,
+          "richiestaCorrente": {
+            "testo": "Si lamenta del carico di lavoro"
+          },
+          "usiConsecutiviAffiancamento": 0,
+          "uscitoDallaRete": false,
+          "roundConsecutiviSogliaRiclassificazione": 0,
+          "clusterOriginale": null,
+          "riclassificatoAlRound": null,
+          "storicoStats": [],
+          "cronologia": []
+        }
+      ],
+      "oreDisponibiliRound": 10,
+      "oreUsateRound": 1,
+      "azioniSottomesseRound": {
+        "c1": "delega"
+      },
+      "confermato": false,
+      "climaTeam": 70,
+      "log": [],
+      "punteggiPerRound": [],
+      "riepilogoSettimanaChiusa": null,
+      "recapMazzi": {},
+      "metriche": {
+        "oreTotaliPerCollaboratore": {},
+        "oreTotali": 0,
+        "oreSistemicheTotali": 0,
+        "conteggioAzioni": {},
+        "azioniCoerentiCount": 0,
+        "azioniTotaliCount": 0,
+        "allocazionePerRound": [],
+        "punteggioCoerenzaAzione": 0
+      },
+      "modificatorePropensioneSistemica": 0,
+      "storicoRichieste": [
+        {
+          "round": 1,
+          "numeroRichieste": 2
+        }
+      ],
+      "turnoSilenziosoOccorso": false,
+      "messaggiNarrativiRound": [],
+      "azioniSistemicheSottomesseRound": [],
+      "azioniSistemicheLog": [],
+      "impattoCrisi": null,
+      "messaggioCaloRichiesteMostrato": false,
+      "token": "6604d81e09b7a0283e1d16d3d1b8dbff"
+    }
+  },
+  "creataIl": "2026-08-20T07:54:51.563Z",
+  "tokenFacilitatore": "225e5152c2b7b27840985d7c12f761a2",
+  "roundIniziatoIl": 1787212492841,
+  "inPausa": false,
+  "pausaIniziataIl": null,
+  "durataRoundSecondi": 300
+}

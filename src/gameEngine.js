@@ -83,6 +83,7 @@ function nuovoTavolo(id, nome, codiceAccesso, collaboratoriConfig, gameConfig) {
     log: [], // { round, collaboratoreId, azioneId, costoOre, cluster }
     punteggiPerRound: [],
     riepilogoSettimanaChiusa: null, // ultimo riepilogo per la schermata di attesa lato tavolo (vedi calcolaRiepilogoSettimanaChiusa)
+    recapMazzi: {}, // stato dei "mazzi" di varianti testuali gia' pescate per il riepilogo settimanale (vedi pescaVariante)
     metriche: {
       oreTotaliPerCollaboratore: {},
       oreTotali: 0,
@@ -562,9 +563,16 @@ function chiudiRound(tavolo, roundNumero, azioniConfig, gameConfig, collaborator
     tavolo,
     roundNumero,
     azioniConfig,
-    messaggiNarrativiConfig.recapSettimana,
-    Math.round(efficienzaGruppo),
-    puntoRoundPrecedente ? puntoRoundPrecedente.efficienzaGruppo : null
+    messaggiNarrativiConfig && messaggiNarrativiConfig.recapSettimana,
+    {
+      efficienzaGruppo: Math.round(efficienzaGruppo),
+      efficienzaGruppoPrecedente: puntoRoundPrecedente ? puntoRoundPrecedente.efficienzaGruppo : null,
+      faseDiQuestoRound,
+      messaggiNarrativiRound: messaggiNarrativi,
+      usaAzioneSistemicaQuestoRound,
+      richiesteQuestoRound,
+      richiesteGestiteQuestoRound
+    }
   );
 
   // reset per il round successivo
@@ -578,13 +586,106 @@ function media(arr) {
   return arr.reduce((a, b) => a + b, 0) / arr.length;
 }
 
+// Pesca una variante da una lista trattandola come un mazzo di carte senza ripetizioni: tiene
+// traccia (su tavolo.recapMazzi) di quali indici sono gia' stati estratti per quella chiave, e
+// rimescola solo quando il mazzo si esaurisce. Molto meglio di round % lunghezza, che con liste
+// corte e partite di poche settimane produceva ripetizioni percepibili gia' dopo 2-3 round. In
+// piu', appena il mazzo si rimescola evita di ripescare subito l'ultima variante uscita prima del
+// rimescolo: con liste da 3 elementi e un bucket rivisitato 4+ volte in partita un'eventuale
+// ripetizione e' inevitabile, ma cosi' non e' mai consecutiva. L'estrazione resta deterministica
+// (seed su tavolo+chiave+round) solo per rendere i test riproducibili: non serve equita' fra
+// tavoli qui, a differenza delle richieste.
+function pescaVariante(tavolo, chiaveMazzo, lista, roundNumero) {
+  if (!lista || lista.length === 0) return null;
+  if (!tavolo.recapMazzi) tavolo.recapMazzi = {};
+  if (!tavolo.recapUltimi) tavolo.recapUltimi = {};
+  let mazzo = tavolo.recapMazzi[chiaveMazzo];
+  const appenaRimescolato = !mazzo || mazzo.length === 0;
+  if (appenaRimescolato) {
+    mazzo = lista.map((_, i) => i);
+  }
+  const ultimo = tavolo.recapUltimi[chiaveMazzo];
+  const candidati = appenaRimescolato && mazzo.length > 1 && ultimo !== undefined
+    ? mazzo.filter((i) => i !== ultimo)
+    : mazzo;
+  const rng = creaGeneratoreSeeded(seedDaStringa(`${tavolo.id}|${chiaveMazzo}|${roundNumero}`));
+  const posizione = Math.floor(rng() * candidati.length);
+  const indiceScelto = candidati[posizione];
+  mazzo = mazzo.filter((i) => i !== indiceScelto);
+  tavolo.recapMazzi[chiaveMazzo] = mazzo;
+  tavolo.recapUltimi[chiaveMazzo] = indiceScelto;
+  return lista[indiceScelto];
+}
+
+// Fascia di esito della crisi (Fase 3) in base a quante richieste sono state gestite, per scegliere
+// il pool di template giusto in eventiSpeciali.crisiChiusa.
+function esitoCrisi(richieste, gestite) {
+  if (!richieste) return 'buona';
+  const rapporto = gestite / richieste;
+  if (rapporto >= 0.7) return 'buona';
+  if (rapporto <= 0.3) return 'scarsa';
+  return 'mista';
+}
+
+// Sceglie il collaboratore da citare nel messaggio generico, a rotazione fra tre strategie (cosi'
+// il riepilogo non mette sempre in luce lo stesso tipo di persona): 'investito' (chi ha ricevuto
+// piu' tempo quella settimana), 'migliorato' (maggior delta positivo su competenza+autonomia+
+// motivazione rispetto al round precedente) e 'trascurato' (chi non riceve un intervento reale da
+// piu' tempo). La rotazione e' round+offset-per-tavolo, cosi' tavoli diversi nella stessa aula non
+// sentono sempre la stessa strategia nella stessa settimana.
+function sceglieCitazione(tavolo, roundNumero, azioniReali, strategie) {
+  const lista = strategie && strategie.length > 0 ? strategie : ['investito'];
+  const offset = seedDaStringa(tavolo.id) % lista.length;
+  const strategia = lista[(roundNumero + offset) % lista.length];
+  const attivi = tavolo.collaboratori.filter((c) => !c.uscitoDallaRete);
+
+  if (strategia === 'trascurato') {
+    const citato = attivi.reduce((max, c) => (!max || c.roundConsecutiviTrascurato > max.roundConsecutiviTrascurato ? c : max), null);
+    if (citato) return citato.nome;
+  }
+
+  if (strategia === 'migliorato') {
+    let migliore = null;
+    let migliorDelta = -Infinity;
+    for (const c of attivi) {
+      const storia = c.storicoStats || [];
+      const attuale = storia[storia.length - 1];
+      const precedente = storia.length > 1 ? storia[storia.length - 2] : c.statsIniziali;
+      if (!attuale || !precedente) continue;
+      const delta = (attuale.competenza - precedente.competenza) + (attuale.autonomia - precedente.autonomia) + (attuale.motivazione - precedente.motivazione);
+      if (delta > migliorDelta) {
+        migliorDelta = delta;
+        migliore = c;
+      }
+    }
+    if (migliore) return migliore.nome;
+  }
+
+  // 'investito' (default e fallback delle altre due se non calcolabili, es. round 1)
+  if (azioniReali.length > 0) {
+    let top = azioniReali[0];
+    for (const v of azioniReali) {
+      if (v.costoOre > top.costoOre) top = v;
+    }
+    const c = tavolo.collaboratori.find((x) => x.id === top.collaboratoreId);
+    if (c) return c.nome;
+  }
+  return 'il team';
+}
+
 // Riepilogo mostrato al tavolo nella schermata di attesa dopo la chiusura di una settimana, al
 // posto della rotella di caricamento: elenco delle azioni reali fatte quella settimana + un
 // messaggio narrativo volutamente ambiguo (non un giudizio numerico) su come si sta muovendo il
-// team, con una parola di sintesi. Se il tavolo non ha fatto nulla lo dice, citando il
-// collaboratore piu' a rischio; altrimenti cita chi ha ricevuto piu' tempo quella settimana.
-function calcolaRiepilogoSettimanaChiusa(tavolo, roundNumero, azioniConfig, recapConfig, efficienzaGruppo, efficienzaGruppoPrecedente) {
+// team, con una parola di sintesi. Priorita': 1) un evento singolo di questo round (abbandono,
+// dipendenza, riclassificazione, prima azione sistemica, chiusura della crisi) se e' successo;
+// 2) "nessuna azione" se il tavolo non ha fatto nulla; 3) il messaggio generico livello/tendenza,
+// con citazione a rotazione e, in Fase 4 con pochi interventi individuali, una nota di maturita'.
+function calcolaRiepilogoSettimanaChiusa(tavolo, roundNumero, azioniConfig, recapConfig, contesto) {
   if (!recapConfig) return null;
+  const {
+    efficienzaGruppo, efficienzaGruppoPrecedente, faseDiQuestoRound, messaggiNarrativiRound,
+    usaAzioneSistemicaQuestoRound, richiesteQuestoRound, richiesteGestiteQuestoRound
+  } = contesto || {};
 
   const vociRound = tavolo.log.filter((v) => v.round === roundNumero);
   const azioniReali = vociRound.filter((v) => v.azioneId !== 'nessunIntervento');
@@ -595,12 +696,62 @@ function calcolaRiepilogoSettimanaChiusa(tavolo, roundNumero, azioniConfig, reca
     return { nome: collaboratore ? collaboratore.nome : '—', azioneLabel: azione ? azione.label : v.azioneId };
   });
 
+  // 1) eventi singoli prioritari
+  const eventi = recapConfig.eventiSpeciali || {};
+  const trovaEvento = (tipo) => (messaggiNarrativiRound || []).find((m) => m.tipo === tipo);
+  const evAbbandono = trovaEvento('abbandono');
+  const evDipendenza = trovaEvento('dipendenza');
+  const evRiclassificazione = trovaEvento('riclassificazione');
+  const primaVoltaSistemica = !!usaAzioneSistemicaQuestoRound &&
+    (tavolo.azioniSistemicheLog || []).filter((e) => e.round < roundNumero).length === 0;
+
+  let speciale = null;
+  let nomeSpeciale = null;
+  if (evAbbandono && eventi.abbandono) {
+    speciale = 'abbandono';
+    const c = tavolo.collaboratori.find((x) => x.id === evAbbandono.collaboratoreId);
+    nomeSpeciale = c ? c.nome : null;
+  } else if (evDipendenza && eventi.dipendenza) {
+    speciale = 'dipendenza';
+    const c = tavolo.collaboratori.find((x) => x.id === evDipendenza.collaboratoreId);
+    nomeSpeciale = c ? c.nome : null;
+  } else if (evRiclassificazione && eventi.riclassificazione) {
+    speciale = 'riclassificazione';
+    const c = tavolo.collaboratori.find((x) => x.id === evRiclassificazione.collaboratoreId);
+    nomeSpeciale = c ? c.nome : null;
+  } else if (primaVoltaSistemica && eventi.primaAzioneSistemica) {
+    speciale = 'primaAzioneSistemica';
+  } else if (faseDiQuestoRound === 3 && eventi.crisiChiusa) {
+    speciale = 'crisiChiusa';
+  }
+
+  if (speciale) {
+    let lista;
+    let chiaveMazzo = `evento.${speciale}`;
+    if (speciale === 'crisiChiusa') {
+      const esito = esitoCrisi(richiesteQuestoRound || 0, richiesteGestiteQuestoRound || 0);
+      lista = eventi.crisiChiusa[esito];
+      chiaveMazzo += `.${esito}`;
+    } else {
+      lista = eventi[speciale];
+    }
+    const tpl = pescaVariante(tavolo, chiaveMazzo, lista, roundNumero);
+    if (tpl) {
+      return {
+        round: roundNumero,
+        testo: tpl.template.replace('{nome}', nomeSpeciale || 'il team'),
+        parola: tpl.parola,
+        azioni
+      };
+    }
+  }
+
+  // 2) nessuna azione reale questa settimana
   if (azioniReali.length === 0) {
     const attivi = tavolo.collaboratori.filter((c) => !c.uscitoDallaRete);
     const pool = attivi.length > 0 ? attivi : tavolo.collaboratori;
     const citato = pool.reduce((min, c) => (!min || c.stats.motivazione < min.stats.motivazione ? c : min), null);
-    const lista = recapConfig.nessunaAzione;
-    const tpl = lista[roundNumero % lista.length];
+    const tpl = pescaVariante(tavolo, 'nessunaAzione', recapConfig.nessunaAzione, roundNumero);
     return {
       round: roundNumero,
       testo: tpl.template.replace('{nome}', citato ? citato.nome : 'il team'),
@@ -609,13 +760,7 @@ function calcolaRiepilogoSettimanaChiusa(tavolo, roundNumero, azioniConfig, reca
     };
   }
 
-  let migliore = azioniReali[0];
-  for (const v of azioniReali) {
-    if (v.costoOre > migliore.costoOre) migliore = v;
-  }
-  const collaboratoreCitato = tavolo.collaboratori.find((c) => c.id === migliore.collaboratoreId);
-  const nomeCitato = collaboratoreCitato ? collaboratoreCitato.nome : 'il team';
-
+  // 3) messaggio generico livello/tendenza, con citazione a rotazione
   let livello = 'medio';
   if (efficienzaGruppo >= recapConfig.sogliaLivelloAlto) livello = 'alto';
   else if (efficienzaGruppo <= recapConfig.sogliaLivelloBasso) livello = 'basso';
@@ -623,19 +768,26 @@ function calcolaRiepilogoSettimanaChiusa(tavolo, roundNumero, azioniConfig, reca
   let tendenza = 'stabile';
   if (efficienzaGruppoPrecedente !== null && efficienzaGruppoPrecedente !== undefined) {
     const delta = efficienzaGruppo - efficienzaGruppoPrecedente;
-    if (delta >= recapConfig.sogliaTendenzaSalita) tendenza = 'salita';
+    if (delta >= recapConfig.sogliaTendenzaSalitaForte) tendenza = 'salitaForte';
+    else if (delta >= recapConfig.sogliaTendenzaSalita) tendenza = 'salita';
+    else if (delta <= recapConfig.sogliaTendenzaCaloForte) tendenza = 'caloForte';
     else if (delta <= recapConfig.sogliaTendenzaCalo) tendenza = 'calo';
   }
 
-  const lista = recapConfig.griglia[livello][tendenza];
-  const tpl = lista[roundNumero % lista.length];
+  const nomeCitato = sceglieCitazione(tavolo, roundNumero, azioniReali, recapConfig.citazioniStrategie);
+  const listaGriglia = ((recapConfig.griglia || {})[livello] || {})[tendenza] || [];
+  const tpl = pescaVariante(tavolo, `griglia.${livello}.${tendenza}`, listaGriglia, roundNumero);
+  let testo = tpl ? tpl.template.replace('{nome}', nomeCitato) : '';
+  const parola = tpl ? tpl.parola : '—';
 
-  return {
-    round: roundNumero,
-    testo: tpl.template.replace('{nome}', nomeCitato),
-    parola: tpl.parola,
-    azioni
-  };
+  // 4) nota di maturita' in Fase 4: solo se il tavolo ha davvero fatto al massimo un intervento
+  // individuale questa settimana (altrimenti sarebbe una nota fuori luogo, non uno stile scelto)
+  if (faseDiQuestoRound === 4 && azioniReali.length <= 1 && recapConfig.faseMaturita4 && recapConfig.faseMaturita4.length > 0) {
+    const nota = pescaVariante(tavolo, 'faseMaturita4', recapConfig.faseMaturita4, roundNumero);
+    if (nota) testo += nota;
+  }
+
+  return { round: roundNumero, testo, parola, azioni };
 }
 
 // ---------- Metriche derivate condivise tra chiudiRound (storico per round, usato dal grafico

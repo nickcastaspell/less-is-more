@@ -1,6 +1,6 @@
 {
   "name": "less-is-more-game",
-  "version": "15.0.0",
+  "version": "16.0.0",
   "description": "Business game 'Less is More' - Leadership Through Smart Resource Allocation",
   "main": "server.js",
   "scripts": {
